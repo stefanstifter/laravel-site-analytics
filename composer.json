@@ -1,0 +1,27 @@
+{
+    "name": "stifter/site-analytics",
+    "description": "Minimal, privacy-friendly site analytics for Laravel apps, built on andreaselia/analytics.",
+    "version": "0.1.0",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "andreaselia/analytics": "^2.4",
+        "laravel/framework": "^12.0",
+        "livewire/flux": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Stifter\\SiteAnalytics\\": "src/",
+            "Stifter\\SiteAnalytics\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Stifter\\SiteAnalytics\\SiteAnalyticsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable"
+}
