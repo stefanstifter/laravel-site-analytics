@@ -11,6 +11,10 @@ All notable changes to this package. It follows [Semantic Versioning](https://se
 - Countries panel on the Overview, with flags and names in the app locale.
 - System page: what is tracked, the country database's state and stored data, with "Update now" and "Prune now" buttons.
 - `manageSiteAnalytics` gate for the System page actions. Falls back to `viewSiteAnalytics`.
+- Click tracking. `<x-site-analytics::script />` counts clicks on links and buttons inside `data-track-group="…"`, on elements with `data-track`, and on every link to another site, `mailto:` and `tel:` (`clicks.outbound`). Clicks go to a new `analytics_clicks` table. Run the migrations.
+- Clicks tab: clicks per day, groups, top links, other sites, devices and each page's click rate, with drill-down into a group or link. The Overview shows a Clicks total, and the System page shows click tracking and stored clicks.
+- `SiteAnalytics::click()` to record a click from PHP, e.g. in a redirect route.
+- `clicks` config: `enabled`, `outbound` and `retention_days` (365). `site-analytics:prune` and "Prune now" delete expired clicks too.
 
 ### Changed
 

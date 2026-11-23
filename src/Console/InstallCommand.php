@@ -31,6 +31,7 @@ final class InstallCommand extends Command
         $this->components->bulletList([
             "Record page views: set 'track_group' => 'web' in config/site-analytics.php, or add ->middleware('site-analytics') to your public routes.",
             "Keep admin and login pages out with 'exclude'.",
+            'Count clicks: add <x-site-analytics::script /> to your layout and mark sections with data-track-group="…". Links to other sites count without markup.',
             "Decide who sees the reports: Gate::define('viewSiteAnalytics', fn (\$user) => ...). By default any logged-in user can.",
             'Keep the country database fresh: run site-analytics:geoip-update monthly, or set geoip.auto_update to true.',
             'Open the reports at /'.trim((string) config('site-analytics.routes.prefix'), '/').'. The System tab shows whether everything works.',

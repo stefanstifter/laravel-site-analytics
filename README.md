@@ -5,8 +5,9 @@ Privacy-friendly page view and event tracking for Laravel, with report pages tha
 - Page views with hashed sessions and a cookie-free daily visitor ID
 - Visitor countries from a local IP database. IPs never leave the server and are never stored
 - Bots and logged-in users are ignored by default (you know you visit your own site a lot)
+- Click tracking for links and buttons with a 1 KB inline script and two data attributes, plus every link to another site
 - Events and search tracking that merges keystrokes into one search
-- Overview and Searches reports in English and German, plus room for your own tabs
+- Overview, Searches and Clicks reports in English and German, plus room for your own tabs
 - A System page that shows what is tracked and keeps the country database up to date
 
 ## Installation
@@ -52,6 +53,41 @@ SiteAnalytics::event('outbound_click', $model, ['url' => $url]);
 SiteAnalytics::search('listing', $term, $filters, $resultCount);
 ```
 
+For clicks on links and buttons, see [Clicks](#clicks).
+
+## Clicks
+
+Find out which of your links and offers people actually click. Add the script to the layout of your public pages, once:
+
+```blade
+<x-site-analytics::script />
+```
+
+Then mark what to count:
+
+```blade
+<section data-track-group="Side projects">
+    <a href="https://example.com">AI Agent</a>          {{-- "AI Agent" in "Side projects" --}}
+    <button>Request offer</button>                       {{-- buttons count too --}}
+</section>
+
+<a href="/contact" data-track="Hero CTA">Get in touch</a> {{-- one link, own label --}}
+<a href="/pricing" data-track>See pricing</a>             {{-- one link, labelled by its text --}}
+<footer data-track="false">…</footer>                    {{-- never counted --}}
+```
+
+Every link and button inside a `data-track-group` counts. Labels are the `data-track` value, the `aria-label` or the visible text, without screen-reader-only text. Links to other sites, `mailto:` and `tel:` count without any markup; set `clicks.outbound` to `false` to count only what you marked. Middle-clicks count, and a click survives the browser leaving the page.
+
+The Clicks tab shows clicks per day, groups, the top links, other sites, devices, and each page's click rate: the share of its visitors who clicked. Click a group or link to see only its clicks.
+
+How it works: one click listener sends `group`, `label`, `href` and the page path with `navigator.sendBeacon` to `POST /site-analytics/clicks`. That route runs in the `web` group, without CSRF (beacons can't send the token and cached pages would carry stale ones), limited to 60 clicks per minute per IP. Bots, `ignored_ips`, `exclude`d pages and, by default, logged-in users are not recorded, and for them the script isn't even rendered. Links within your site are stored as paths, so `https://`, `http://` and `www.` variants count as one link. Clicks are kept for `clicks.retention_days` (365).
+
+The script takes your CSP nonce with `nonce="…"`, and uses Vite's nonce when one is set. For clicks the browser can't see, such as a redirect route, record them from PHP:
+
+```php
+SiteAnalytics::click('AI Agent', group: 'Side projects', href: $url);
+```
+
 ## Countries
 
 Countries are looked up in a local copy of [DB-IP](https://db-ip.com)'s free IP-to-country database (about 8 MB, published monthly, CC BY 4.0). Lookups happen on your server; only the country code is stored.
@@ -79,7 +115,7 @@ Gate::define('manageSiteAnalytics', fn (User $user) => $user->is_owner);
 
 They render as a standalone page. To show them inside your app, set `layout` to a Blade component such as `'layouts.app'` (it gets a `title` and the page as its slot). Set `dark_mode` to `'class'` if your app switches dark mode with a `.dark` class only, as Flux does. Colours are CSS variables, so `.sa { --sa-accent: #e11d48; }` makes them yours.
 
-To add your own tab after Overview and Searches, register a route and add it to `extra_navigation`:
+To add your own tab after Overview, Searches and Clicks, register a route and add it to `extra_navigation`:
 
 ```php
 'extra_navigation' => [
@@ -91,9 +127,9 @@ Build the page with `<x-site-analytics::layout>` and the `stats`, `stat`, `panel
 
 ## Configuration
 
-The usual suspects in `config/site-analytics.php`: `enabled` (env `ANALYTICS_ENABLED`), `track_group`, `exclude`, `ignored_ips`, `ignore_robots`, `ignore_authenticated`, plus route, layout, extra navigation, retention and `geoip` settings. Each one is documented in the file.
+The usual suspects in `config/site-analytics.php`: `enabled` (env `ANALYTICS_ENABLED`), `track_group`, `exclude`, `ignored_ips`, `ignore_robots`, `ignore_authenticated`, `clicks`, plus route, layout, extra navigation, retention and `geoip` settings. Each one is documented in the file.
 
-Expired events are pruned now and then while recording. To prune on a schedule instead, run `site-analytics:prune` daily and set `prune_lottery` to `[0, 1]`.
+Expired events and clicks are pruned now and then while recording. To prune on a schedule instead, run `site-analytics:prune` daily and set `prune_lottery` to `[0, 1]`.
 
 ## Changelog
 
