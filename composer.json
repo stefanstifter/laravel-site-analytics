@@ -9,10 +9,19 @@
         "laravel/framework": "^12.0",
         "livewire/flux": "^2.1"
     },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "orchestra/testbench": "^10.0"
+    },
     "autoload": {
         "psr-4": {
             "Stifter\\SiteAnalytics\\": "src/",
             "Stifter\\SiteAnalytics\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Stifter\\SiteAnalytics\\Tests\\": "tests/"
         }
     },
     "extra": {
@@ -21,6 +30,13 @@
                 "Stifter\\SiteAnalytics\\SiteAnalyticsServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "pint"
+    },
+    "config": {
+        "sort-packages": true
     },
     "minimum-stability": "stable"
 }
