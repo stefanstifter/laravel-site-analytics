@@ -55,6 +55,13 @@ class EventRecorderTest extends TestCase
         $this->assertNotNull(app(EventRecorder::class)->record($request, AnalyticsEvent::OUTBOUND_CLICK));
     }
 
+    public function test_it_skips_ignored_ips_like_page_views_do(): void
+    {
+        config()->set('site-analytics.ignored_ips', ['127.0.0.1']);
+
+        $this->assertNull(app(EventRecorder::class)->record($this->request(self::BROWSER_USER_AGENT), AnalyticsEvent::OUTBOUND_CLICK));
+    }
+
     private function request(string $userAgent): Request
     {
         $request = Request::create('/races/x', server: ['HTTP_USER_AGENT' => $userAgent]);

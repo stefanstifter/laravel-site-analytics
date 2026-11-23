@@ -16,6 +16,10 @@ All notable changes to this package. It follows [Semantic Versioning](https://se
 
 - The package's own tabs are always shown. The `navigation` config is now `extra_navigation` and only lists the app's tabs. Remove Overview and Searches from it.
 
+### Fixed
+
+- Events are no longer recorded for `ignored_ips`, the same as page views.
+
 ## 0.3.0 - 2026-11-23
 
 ### Added

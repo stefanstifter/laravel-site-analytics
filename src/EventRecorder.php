@@ -161,6 +161,9 @@ class EventRecorder
         }
     }
 
+    /**
+     * Whether anything is recorded for this request: tracking is on, and it is not from a bot, an ignored IP or (by default) a logged-in user.
+     */
     public function shouldTrack(Request $request, ?UserAgent $agent = null): bool
     {
         if (! config('site-analytics.enabled')) {
@@ -168,6 +171,10 @@ class EventRecorder
         }
 
         if (config('site-analytics.ignore_authenticated') && $request->user() !== null) {
+            return false;
+        }
+
+        if (in_array($request->ip(), config('site-analytics.ignored_ips', []), true)) {
             return false;
         }
 
