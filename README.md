@@ -17,11 +17,11 @@ Minimal, privacy-friendly site analytics for Stifter Software Laravel apps, buil
 
 ## Installation
 
-Add the package as a path repository (or VCS repository) in the app's `composer.json`:
+Add the GitHub repository to the app's `composer.json`:
 
 ```json
 "repositories": [
-    { "type": "path", "url": "../../stifter-software/laravel-site-analytics" }
+    { "type": "vcs", "url": "https://github.com/stefanstifter/laravel-site-analytics" }
 ]
 ```
 
