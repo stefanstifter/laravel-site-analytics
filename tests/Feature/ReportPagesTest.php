@@ -1,0 +1,64 @@
+<?php
+
+namespace Stifter\SiteAnalytics\Tests\Feature;
+
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Stifter\SiteAnalytics\Models\AnalyticsEvent;
+use Stifter\SiteAnalytics\Models\PageView;
+use Stifter\SiteAnalytics\Tests\TestCase;
+
+class ReportPagesTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function defineEnvironment($app): void
+    {
+        $app['config']->set('site-analytics.routes.middleware', ['web']);
+        $app['view']->addLocation(__DIR__.'/../Fixtures/views');
+    }
+
+    public function test_the_overview_renders_as_a_standalone_page_with_its_own_styles(): void
+    {
+        PageView::factory()->create(['visitor' => 'a', 'uri' => '/pricing', 'source' => 'example.org']);
+
+        $response = $this->get('/dashboard/analytics?period=7');
+
+        $response->assertOk()
+            ->assertSee('<!DOCTYPE html>', false)
+            ->assertSee('<title>Analytics · Overview', false)
+            ->assertSee('data-site-analytics-styles', false)
+            ->assertSee('data-selected-period="7"', false)
+            ->assertSee('data-ranked-item="/pricing"', false)
+            ->assertSee('href="https://example.org"', false)
+            ->assertSee('aria-current="page"', false)
+            ->assertDontSee('<flux:', false);
+
+        $this->assertSame(1, substr_count($response->getContent(), 'data-site-analytics-styles'));
+    }
+
+    public function test_the_searches_page_renders(): void
+    {
+        AnalyticsEvent::factory()->create([
+            'name' => AnalyticsEvent::SEARCH,
+            'properties' => ['context' => 'listing', 'term' => 'alps', 'filters' => ['region' => 'europe'], 'results' => 0],
+        ]);
+
+        $this->get('/dashboard/analytics/searches')
+            ->assertOk()
+            ->assertSee('data-term="alps"', false)
+            ->assertSee('sa-badge', false)
+            ->assertSee('data-filter-value="Europe"', false);
+    }
+
+    public function test_the_reports_render_inside_the_configured_app_layout(): void
+    {
+        config(['site-analytics.layout' => 'layouts.app', 'site-analytics.dark_mode' => 'class']);
+
+        $this->get('/dashboard/analytics')
+            ->assertOk()
+            ->assertSee('<body data-app-layout>', false)
+            ->assertSee('<title>Analytics · Overview</title>', false)
+            ->assertSee('data-sa-dark-mode="class"', false)
+            ->assertDontSee('<!DOCTYPE html>', false);
+    }
+}

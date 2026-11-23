@@ -2,14 +2,19 @@
     'label',
     'value',
     'share',
+    'href' => null,
 ])
 
 <div {{ $attributes }}>
-    <div class="flex items-baseline justify-between gap-4 text-sm">
-        <span class="truncate text-zinc-700 dark:text-zinc-300">{{ $label }}</span>
-        <span class="whitespace-nowrap tabular-nums text-zinc-500 dark:text-zinc-400">{{ $value }}</span>
+    <div class="sa-bar-head">
+        @if($href)
+            <a href="{{ $href }}" target="_blank" rel="noopener" class="sa-bar-label">{{ $label }}</a>
+        @else
+            <span class="sa-bar-label">{{ $label }}</span>
+        @endif
+        <span class="sa-bar-value">{{ $value }}</span>
     </div>
-    <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
-        <div class="h-full rounded-full bg-blue-600 dark:bg-blue-400" style="width: {{ max(0, min(100, (int) $share)) }}%"></div>
+    <div class="sa-bar-track">
+        <div class="sa-bar-fill" style="width: {{ max(0, min(100, (int) $share)) }}%"></div>
     </div>
 </div>

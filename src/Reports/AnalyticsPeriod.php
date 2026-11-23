@@ -36,6 +36,16 @@ final class AnalyticsPeriod
         public readonly CarbonImmutable $endDate,
     ) {}
 
+    /**
+     * The period options with translated labels, keyed by number of days.
+     *
+     * @return array<int, string>
+     */
+    public static function options(): array
+    {
+        return array_map(fn (string $label): string => __($label), self::OPTIONS);
+    }
+
     public static function fromRequest(Request $request): self
     {
         $days = (int) $request->input('period', self::DEFAULT_DAYS);

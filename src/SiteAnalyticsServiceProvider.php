@@ -10,6 +10,16 @@ use Stifter\SiteAnalytics\Http\Middleware\RecordPageView;
 
 class SiteAnalyticsServiceProvider extends ServiceProvider
 {
+    private static ?string $css = null;
+
+    /**
+     * The report stylesheet, inlined by the layout so apps need no asset build or published files.
+     */
+    public static function css(): string
+    {
+        return self::$css ??= (string) file_get_contents(__DIR__.'/../resources/css/site-analytics.css');
+    }
+
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/site-analytics.php', 'site-analytics');

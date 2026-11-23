@@ -1,0 +1,503 @@
+/*
+ * Site Analytics report styles. Self-contained: no Tailwind, Flux or build step needed in the host app.
+ * Every rule is scoped to .sa, and colours come from --sa-* variables an app can override on .sa.
+ *
+ * Dark mode follows the system setting, unless an ancestor (usually <html>) has .dark, .light or data-theme="dark|light".
+ * With data-sa-dark-mode="class" (config dark_mode) only .dark and data-theme="dark" switch it on, as with Flux.
+ */
+
+:where(.sa) {
+    --sa-accent: light-dark(#2563eb, #60a5fa);
+    --sa-accent-soft: light-dark(#dbeafe, #1e3a8a);
+    --sa-text: light-dark(#18181b, #fafafa);
+    --sa-text-soft: light-dark(#3f3f46, #d4d4d8);
+    --sa-muted: light-dark(#71717a, #a1a1aa);
+    --sa-faint: light-dark(#a1a1aa, #71717a);
+    --sa-surface: light-dark(#ffffff, #18181b);
+    --sa-surface-soft: light-dark(#fafafa, #1f1f23);
+    --sa-track: light-dark(#f4f4f5, #27272a);
+    --sa-border: light-dark(#e4e4e7, #3f3f46);
+    --sa-warning-bg: light-dark(#fef3c7, #451a03);
+    --sa-warning-text: light-dark(#92400e, #fcd34d);
+    --sa-radius: 0.5rem;
+    --sa-max-width: 80rem;
+}
+
+.sa {
+    color-scheme: light dark;
+    box-sizing: border-box;
+    max-width: var(--sa-max-width);
+    margin-inline: auto;
+    padding: 1.5rem 1rem;
+    color: var(--sa-text);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.sa[data-sa-dark-mode='class'],
+:is(.light, [data-theme='light']) .sa {
+    color-scheme: light;
+}
+
+:is(.dark, [data-theme='dark']) .sa {
+    color-scheme: dark;
+}
+
+.sa *,
+.sa *::before,
+.sa *::after {
+    box-sizing: inherit;
+}
+
+.sa :is(h1, h2, h3, p, ol, ul, figure) {
+    margin: 0;
+}
+
+.sa a {
+    color: inherit;
+}
+
+@media (min-width: 40rem) {
+    .sa {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (min-width: 64rem) {
+    .sa {
+        padding-inline: 2rem;
+    }
+}
+
+/* Header, period picker and tabs */
+
+.sa-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.sa-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.sa-periods {
+    display: inline-flex;
+    overflow: hidden;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius);
+    background: var(--sa-surface);
+}
+
+.sa-period {
+    padding: 0.375rem 0.75rem;
+    color: var(--sa-text-soft);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sa-period + .sa-period {
+    border-inline-start: 1px solid var(--sa-border);
+}
+
+.sa-period:hover {
+    background: var(--sa-track);
+}
+
+.sa-period[aria-current='true'] {
+    background: var(--sa-accent);
+    color: var(--sa-surface);
+}
+
+.sa-tabs {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-tab {
+    margin-bottom: -1px;
+    padding: 0.625rem 0;
+    border-bottom: 2px solid transparent;
+    color: var(--sa-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sa-tab:hover {
+    color: var(--sa-text);
+}
+
+.sa-tab[aria-current='page'] {
+    border-color: var(--sa-accent);
+    color: var(--sa-text);
+}
+
+.sa-description {
+    margin-top: 1rem;
+    color: var(--sa-muted);
+    font-size: 0.875rem;
+}
+
+.sa-content {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Layout helpers */
+
+.sa-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+@media (min-width: 64rem) {
+    .sa-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.sa-stack {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.sa-muted {
+    color: var(--sa-muted);
+}
+
+.sa-caps {
+    color: var(--sa-faint);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Stat cards */
+
+.sa-stats {
+    display: grid;
+    gap: 1rem;
+}
+
+@media (min-width: 40rem) {
+    .sa-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 64rem) {
+    .sa-stats {
+        grid-template-columns: repeat(var(--sa-stat-columns, 4), minmax(0, 1fr));
+    }
+}
+
+.sa-stat {
+    padding: 1.25rem;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius);
+    background: var(--sa-surface);
+}
+
+.sa-stat-label {
+    color: var(--sa-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.sa-stat-value {
+    margin-top: 0.5rem;
+    font-size: 1.875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.sa-stat-hint {
+    margin-top: 0.25rem;
+    color: var(--sa-muted);
+    font-size: 0.75rem;
+}
+
+/* Panels */
+
+.sa-panel {
+    overflow: hidden;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius);
+    background: var(--sa-surface);
+}
+
+.sa-panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--sa-border);
+}
+
+.sa-panel-title {
+    color: var(--sa-muted);
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.sa-panel-actions {
+    color: var(--sa-muted);
+    font-size: 0.875rem;
+}
+
+.sa-panel-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.sa-empty {
+    padding-block: 0.5rem;
+    color: var(--sa-muted);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* Bars and ranked lists */
+
+.sa-list {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0;
+    list-style: none;
+}
+
+.sa-bar-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.sa-bar-label {
+    overflow: hidden;
+    color: var(--sa-text-soft);
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+a.sa-bar-label:hover {
+    text-decoration: underline;
+}
+
+.sa-bar-value {
+    color: var(--sa-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.sa-bar-track {
+    height: 0.375rem;
+    margin-top: 0.375rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: var(--sa-track);
+}
+
+.sa-bar-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: var(--sa-accent);
+}
+
+.sa-filters {
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+
+.sa-filter-name {
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Tables */
+
+.sa-table-wrap {
+    overflow-x: auto;
+}
+
+.sa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.sa-table th {
+    padding: 0.75rem 1.5rem;
+    background: var(--sa-surface-soft);
+    color: var(--sa-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: start;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.sa-table td {
+    padding: 0.75rem 1.5rem;
+    border-top: 1px solid var(--sa-border);
+    overflow-wrap: anywhere;
+}
+
+.sa-table > tbody:first-child > tr:first-child > td {
+    border-top: 0;
+}
+
+.sa-table :is(th, td).sa-num {
+    width: 1%;
+    color: var(--sa-text-soft);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    white-space: nowrap;
+}
+
+.sa-table th.sa-num {
+    color: var(--sa-muted);
+}
+
+.sa-table td.sa-table-empty {
+    padding-block: 1.5rem;
+    color: var(--sa-muted);
+    text-align: center;
+}
+
+.sa-badge {
+    display: inline-block;
+    margin-inline-start: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    background: var(--sa-warning-bg);
+    color: var(--sa-warning-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    vertical-align: middle;
+}
+
+/* Collapsible section */
+
+.sa-details {
+    overflow: hidden;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius);
+    background: var(--sa-surface);
+}
+
+.sa-details > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    color: var(--sa-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+}
+
+.sa-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.sa-details > summary:hover {
+    color: var(--sa-text);
+}
+
+.sa-details > summary svg {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 150ms;
+}
+
+.sa-details[open] > summary svg {
+    transform: rotate(180deg);
+}
+
+.sa-details > .sa-table-wrap {
+    border-top: 1px solid var(--sa-border);
+}
+
+/* Line chart */
+
+.sa-chart {
+    padding: 1rem 0.5rem;
+}
+
+@media (min-width: 40rem) {
+    .sa-chart {
+        padding-inline: 1rem;
+    }
+}
+
+.sa-chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    color: var(--sa-accent);
+}
+
+.sa-chart-grid {
+    stroke: var(--sa-border);
+}
+
+.sa-chart-label {
+    fill: var(--sa-muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.sa-chart-tooltip-value {
+    fill: var(--sa-text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sa-chart-cursor {
+    stroke: var(--sa-faint);
+}
+
+.sa-chart-dot {
+    stroke: var(--sa-surface);
+}
+
+.sa-chart-tooltip-box {
+    fill: var(--sa-surface);
+    stroke: var(--sa-border);
+}
+
+.sa-chart-hover {
+    opacity: 0;
+}
+
+.sa-chart-point:hover .sa-chart-hover {
+    opacity: 1;
+}

@@ -10,39 +10,39 @@
         />
     </x-site-analytics::stats>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="sa-grid">
         @foreach([
             ['title' => __('Top :count Search Terms', ['count' => $termLimit]), 'rows' => $topTerms, 'key' => 'top-terms', 'count' => 'searches', 'countLabel' => __('Searches'), 'empty' => __('No search terms in this period.')],
             ['title' => __('Search Terms Without Results'), 'rows' => $termsWithoutResults, 'key' => 'terms-without-results', 'count' => 'without_results', 'countLabel' => __('No results'), 'empty' => __('Every search found something.')],
         ] as $table)
             <x-site-analytics::panel :title="$table['title']" :padded="false" data-table="{{ $table['key'] }}">
-                <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-                    <thead class="bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
+                <x-site-analytics::table>
+                    <thead>
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left font-medium">{{ __('Term') }}</th>
-                            <th scope="col" class="whitespace-nowrap px-6 py-3 text-right font-medium">{{ $table['countLabel'] }}</th>
-                            <th scope="col" class="px-6 py-3 text-right font-medium">{{ __('Visitors') }}</th>
+                            <th scope="col">{{ __('Term') }}</th>
+                            <th scope="col" class="sa-num">{{ $table['countLabel'] }}</th>
+                            <th scope="col" class="sa-num">{{ __('Visitors') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
+                    <tbody>
                         @forelse($table['rows'] as $row)
                             <tr data-term="{{ $row->term }}" data-count="{{ $row->{$table['count']} }}" data-searchers="{{ $row->searchers }}">
-                                <td class="w-full break-words px-6 py-3 text-zinc-900 dark:text-white">
+                                <td>
                                     {{ $row->term }}
                                     @if($table['key'] === 'top-terms' && (int) $row->without_results === (int) $row->searches)
-                                        <flux:badge size="sm" color="amber" class="ml-2">{{ __('No results') }}</flux:badge>
+                                        <span class="sa-badge">{{ __('No results') }}</span>
                                     @endif
                                 </td>
-                                <td class="whitespace-nowrap px-6 py-3 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{{ number_format($row->{$table['count']}) }}</td>
-                                <td class="whitespace-nowrap px-6 py-3 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{{ number_format($row->searchers) }}</td>
+                                <td class="sa-num">{{ number_format($row->{$table['count']}) }}</td>
+                                <td class="sa-num">{{ number_format($row->searchers) }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-6 py-6 text-center text-zinc-500 dark:text-zinc-400">{{ $table['empty'] }}</td>
+                                <td colspan="3" class="sa-table-empty">{{ $table['empty'] }}</td>
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
+                </x-site-analytics::table>
             </x-site-analytics::panel>
         @endforeach
     </div>
@@ -51,11 +51,11 @@
         @if($filterUsage->isEmpty())
             <x-site-analytics::empty>{{ __('No filters used in this period.') }}</x-site-analytics::empty>
         @else
-            <div class="grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="sa-filters">
                 @foreach($filterUsage as $filter)
                     <div data-filter="{{ $filter['label'] }}">
-                        <div class="text-sm font-semibold text-zinc-900 dark:text-white">{{ $filter['label'] }}</div>
-                        <div class="mt-3 space-y-3">
+                        <h3 class="sa-filter-name">{{ $filter['label'] }}</h3>
+                        <div class="sa-stack">
                             @foreach($filter['values'] as $value)
                                 <x-site-analytics::bar
                                     :label="$value['label']"
@@ -73,19 +73,19 @@
     </x-site-analytics::panel>
 
     <x-site-analytics::panel :title="__('Common Filter Combinations')" :padded="false" data-table="combinations">
-        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-            <tbody class="divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
+        <x-site-analytics::table>
+            <tbody>
                 @forelse($combinations as $combination)
                     <tr data-combination="{{ $combination['label'] }}" data-count="{{ $combination['searches'] }}">
-                        <td class="px-6 py-3 text-zinc-900 dark:text-white">{{ $combination['label'] }}</td>
-                        <td class="whitespace-nowrap px-6 py-3 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{{ number_format($combination['searches']) }}</td>
+                        <td>{{ $combination['label'] }}</td>
+                        <td class="sa-num">{{ number_format($combination['searches']) }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="2" class="px-6 py-6 text-center text-zinc-500 dark:text-zinc-400">{{ __('No filters used in this period.') }}</td>
+                        <td colspan="2" class="sa-table-empty">{{ __('No filters used in this period.') }}</td>
                     </tr>
                 @endforelse
             </tbody>
-        </table>
+        </x-site-analytics::table>
     </x-site-analytics::panel>
 </x-site-analytics::layout>

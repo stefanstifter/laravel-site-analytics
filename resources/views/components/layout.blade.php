@@ -9,43 +9,43 @@
         ->filter(fn (array $item): bool => Route::has($item['route']));
 @endphp
 
-<x-dynamic-component :component="config('site-analytics.layout')" :title="__('Analytics').' · '.$title">
-    <div {{ $attributes->merge(['class' => 'mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8']) }} data-selected-period="{{ $period }}">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <flux:heading size="xl" level="1">{{ __('Analytics') }}</flux:heading>
+<x-dynamic-component :component="config('site-analytics.layout') ?? 'site-analytics::page'" :title="__('Analytics').' · '.$title">
+    <x-site-analytics::styles />
 
-            <flux:button.group data-period-picker>
-                @foreach(\Stifter\SiteAnalytics\Reports\AnalyticsPeriod::OPTIONS as $periodValue => $periodLabel)
-                    <flux:button
-                        :href="request()->fullUrlWithQuery(['period' => $periodValue])"
-                        :variant="$period === $periodValue ? 'primary' : 'outline'"
-                        size="sm"
+    <div {{ $attributes->merge(['class' => 'sa']) }} data-sa-dark-mode="{{ config('site-analytics.dark_mode', 'media') }}" data-selected-period="{{ $period }}">
+        <div class="sa-header">
+            <h1 class="sa-title">{{ __('Analytics') }}</h1>
+
+            <nav class="sa-periods" aria-label="{{ __('Period') }}" data-period-picker>
+                @foreach(\Stifter\SiteAnalytics\Reports\AnalyticsPeriod::options() as $periodValue => $periodLabel)
+                    <a
+                        href="{{ request()->fullUrlWithQuery(['period' => $periodValue]) }}"
+                        class="sa-period"
                         wire:navigate
-                        :aria-current="$period === $periodValue ? 'true' : null"
-                    >
-                        {{ $periodLabel }}
-                    </flux:button>
+                        @if($period === $periodValue) aria-current="true" @endif
+                    >{{ $periodLabel }}</a>
                 @endforeach
-            </flux:button.group>
+            </nav>
         </div>
 
-        <flux:navbar class="-mb-px mt-4 border-b border-zinc-200 dark:border-zinc-700" data-analytics-tabs>
-            @foreach($navigation as $item)
-                <flux:navbar.item
-                    :href="route($item['route'], ['period' => $period])"
-                    :current="request()->routeIs($item['route'])"
-                    wire:navigate
-                >
-                    {{ __($item['label']) }}
-                </flux:navbar.item>
-            @endforeach
-        </flux:navbar>
-
-        @if($description)
-            <flux:text class="mt-4">{{ $description }}</flux:text>
+        @if($navigation->count() > 1)
+            <nav class="sa-tabs" aria-label="{{ __('Reports') }}" data-analytics-tabs>
+                @foreach($navigation as $item)
+                    <a
+                        href="{{ route($item['route'], ['period' => $period]) }}"
+                        class="sa-tab"
+                        wire:navigate
+                        @if(request()->routeIs($item['route'])) aria-current="page" @endif
+                    >{{ __($item['label']) }}</a>
+                @endforeach
+            </nav>
         @endif
 
-        <div class="mt-6 space-y-6">
+        @if($description)
+            <p class="sa-description">{{ $description }}</p>
+        @endif
+
+        <div class="sa-content">
             {{ $slot }}
         </div>
     </div>

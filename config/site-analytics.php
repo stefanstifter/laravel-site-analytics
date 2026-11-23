@@ -31,7 +31,17 @@ return [
         'middleware' => ['web', 'auth', 'verified'],
     ],
 
-    'layout' => 'layouts.app',
+    /**
+     * Blade component the report pages render in, e.g. 'layouts.app'. It receives a "title" attribute and the page as its slot.
+     * Null renders a standalone page. The reports bring their own styles, so the app needs no Tailwind or Flux setup.
+     */
+    'layout' => null,
+
+    /**
+     * How the reports switch to dark mode. 'media' follows the system setting, unless an ancestor has .dark, .light or data-theme="dark|light".
+     * 'class' only goes dark when an ancestor has .dark or data-theme="dark", which is how Flux does it.
+     */
+    'dark_mode' => 'media',
 
     /**
      * Tabs shown on every analytics page, in order. Apps can add their own report pages here; tabs whose route does not exist are skipped.

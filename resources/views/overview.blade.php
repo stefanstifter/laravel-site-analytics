@@ -12,7 +12,7 @@
 
     <x-site-analytics::panel :title="__('Visitors per Day')" :padded="false" data-chart="daily-visitors">
         <x-slot:actions>
-            <span class="text-zinc-500 dark:text-zinc-400">
+            <span>
                 <span data-summary-average-daily="{{ $summary['average_daily_visitors'] }}">{{ __('Avg :count / day', ['count' => number_format($summary['average_daily_visitors'], $summary['average_daily_visitors'] >= 10 ? 0 : 1)]) }}</span>
                 @if($summary['peak_day'] && $summary['peak_visitors'] > 0)
                     · <span data-summary-peak-visitors="{{ $summary['peak_visitors'] }}">{{ __('Peak :count on :day', ['count' => number_format($summary['peak_visitors']), 'day' => $summary['peak_day']]) }}</span>
@@ -26,19 +26,19 @@
         />
     </x-site-analytics::panel>
 
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div class="sa-grid">
         <x-site-analytics::panel :title="__('Top Pages')" data-panel="pages">
-            <x-slot:actions><span class="text-xs uppercase tracking-wider text-zinc-400">{{ __('Visitors') }}</span></x-slot:actions>
+            <x-slot:actions><span class="sa-caps">{{ __('Visitors') }}</span></x-slot:actions>
             <x-site-analytics::ranked-list :items="$pages" :empty="__('No page views in this period.')" :link="fn (string $uri): string => url($uri)" />
         </x-site-analytics::panel>
 
         <x-site-analytics::panel :title="__('Referrers')" data-panel="referrers">
-            <x-slot:actions><span class="text-xs uppercase tracking-wider text-zinc-400">{{ __('Visitors') }}</span></x-slot:actions>
+            <x-slot:actions><span class="sa-caps">{{ __('Visitors') }}</span></x-slot:actions>
             <x-site-analytics::ranked-list :items="$referrers" :empty="__('No visitors arrived from other sites in this period.')" :link="fn (string $host): ?string => str_contains($host, '://') ? null : 'https://'.$host" />
         </x-site-analytics::panel>
 
         <x-site-analytics::panel :title="__('Devices')" data-devices>
-            <div class="space-y-3">
+            <div class="sa-stack">
                 @forelse($devices as $device)
                     <x-site-analytics::bar
                         :label="$device['label']"
@@ -55,38 +55,36 @@
         </x-site-analytics::panel>
 
         <x-site-analytics::panel :title="__('Campaigns')" data-panel="campaigns">
-            <x-slot:actions><span class="text-xs uppercase tracking-wider text-zinc-400">{{ __('Visitors') }}</span></x-slot:actions>
+            <x-slot:actions><span class="sa-caps">{{ __('Visitors') }}</span></x-slot:actions>
             <x-site-analytics::ranked-list :items="$campaigns" :empty="__('No visits from links with UTM tags in this period.')" />
         </x-site-analytics::panel>
     </div>
 
-    <details class="group overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900" data-daily-breakdown>
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-4 text-sm font-medium uppercase tracking-wider text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+    <details class="sa-details" data-daily-breakdown>
+        <summary>
             {{ __('Daily Breakdown') }}
-            <flux:icon.chevron-down variant="micro" class="size-4 transition group-open:rotate-180" />
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
         </summary>
 
-        <div class="overflow-x-auto border-t border-zinc-200 dark:border-zinc-700">
-            <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-                <thead class="bg-zinc-50 text-xs uppercase tracking-wider text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left font-medium">{{ __('Date') }}</th>
-                        <th scope="col" class="px-6 py-3 text-right font-medium">{{ __('Visitors') }}</th>
-                        <th scope="col" class="px-6 py-3 text-right font-medium">{{ __('Page Views') }}</th>
-                        <th scope="col" class="px-6 py-3 text-right font-medium" title="{{ __('Share of visitors on a phone or tablet') }}">{{ __('Mobile') }}</th>
+        <x-site-analytics::table>
+            <thead>
+                <tr>
+                    <th scope="col">{{ __('Date') }}</th>
+                    <th scope="col" class="sa-num">{{ __('Visitors') }}</th>
+                    <th scope="col" class="sa-num">{{ __('Page Views') }}</th>
+                    <th scope="col" class="sa-num" title="{{ __('Share of visitors on a phone or tablet') }}">{{ __('Mobile') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($days->reverse() as $day)
+                    <tr data-day="{{ $day['date'] }}" data-visitors="{{ $day['visitors'] }}" data-page-views="{{ $day['page_views'] }}">
+                        <td>{{ $day['label'] }}</td>
+                        <td class="sa-num">{{ number_format($day['visitors']) }}</td>
+                        <td class="sa-num">{{ number_format($day['page_views']) }}</td>
+                        <td class="sa-num" data-mobile-share="{{ $day['mobile_share'] ?? '' }}">{{ $day['mobile_share'] === null ? '–' : $day['mobile_share'].'%' }}</td>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-zinc-200 text-sm dark:divide-zinc-700">
-                    @foreach($days->reverse() as $day)
-                        <tr data-day="{{ $day['date'] }}" data-visitors="{{ $day['visitors'] }}" data-page-views="{{ $day['page_views'] }}">
-                            <td class="whitespace-nowrap px-6 py-3 text-zinc-900 dark:text-white">{{ $day['label'] }}</td>
-                            <td class="whitespace-nowrap px-6 py-3 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{{ number_format($day['visitors']) }}</td>
-                            <td class="whitespace-nowrap px-6 py-3 text-right tabular-nums text-zinc-700 dark:text-zinc-300">{{ number_format($day['page_views']) }}</td>
-                            <td class="whitespace-nowrap px-6 py-3 text-right tabular-nums text-zinc-700 dark:text-zinc-300" data-mobile-share="{{ $day['mobile_share'] ?? '' }}">{{ $day['mobile_share'] === null ? '–' : $day['mobile_share'].'%' }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                @endforeach
+            </tbody>
+        </x-site-analytics::table>
     </details>
 </x-site-analytics::layout>
