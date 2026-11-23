@@ -2,14 +2,12 @@
 
 namespace Stifter\SiteAnalytics;
 
-use AndreasElia\Analytics\Models\PageView;
-use AndreasElia\Analytics\RequestSessionProvider;
 use Illuminate\Routing\RedirectController;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Stifter\SiteAnalytics\Observers\PageViewObserver;
-use Stifter\SiteAnalytics\Session\HashedSessionProvider;
+use Stifter\SiteAnalytics\Http\Middleware\RecordPageView;
 
 class SiteAnalyticsServiceProvider extends ServiceProvider
 {
@@ -20,9 +18,7 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->configureTrackingDefaults();
-
-        PageView::observe(PageViewObserver::class);
+        $this->registerMiddleware();
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'site-analytics');
@@ -43,13 +39,14 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
     }
 
     /**
-     * Never store raw session IDs: swap andreaselia's default session provider for the hashed one, while respecting any other custom provider.
+     * Register the page view middleware as "site-analytics". The "analytics" alias keeps routes written for andreaselia/analytics working and will be removed in the next release.
      */
-    public function configureTrackingDefaults(): void
+    private function registerMiddleware(): void
     {
-        if (config('analytics.session.provider', RequestSessionProvider::class) === RequestSessionProvider::class) {
-            config()->set('analytics.session.provider', HashedSessionProvider::class);
-        }
+        $router = $this->app->make(Router::class);
+
+        $router->aliasMiddleware('site-analytics', RecordPageView::class);
+        $router->aliasMiddleware('analytics', RecordPageView::class);
     }
 
     /**
