@@ -77,13 +77,9 @@ The usual suspects in `config/site-analytics.php`: `enabled` (env `ANALYTICS_ENA
 
 Expired events are pruned now and then while recording. To prune on a schedule instead, run `site-analytics:prune` daily and set `prune_lottery` to `[0, 1]`.
 
-## Upgrading from 0.2
+## Changelog
 
-1. Flux is no longer used. Drop the `@source` line for this package from your CSS.
-2. Set `layout` to your app layout (it used to default to `layouts.app`), and `dark_mode` to `'class'` with Flux.
-3. `verified` is no longer in the default route middleware, and the `viewSiteAnalytics` gate now guards the reports. Define it if not every user is an admin.
-4. The `analytics` middleware alias is gone. Use `site-analytics`.
-5. Only successful HTML responses are recorded, so redirects and 404s no longer show up as page views.
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## Thanks
 
