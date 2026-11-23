@@ -10,8 +10,10 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Stifter\SiteAnalytics\Console\GeoIpUpdateCommand;
 use Stifter\SiteAnalytics\Console\InstallCommand;
 use Stifter\SiteAnalytics\Console\PruneCommand;
+use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
 use Stifter\SiteAnalytics\Http\Middleware\RecordPageView;
 
 class SiteAnalyticsServiceProvider extends ServiceProvider
@@ -34,6 +36,8 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/site-analytics.php', 'site-analytics');
+
+        $this->app->singleton(CountryDatabase::class);
     }
 
     public function boot(): void
@@ -48,7 +52,7 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
         $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
-            $this->commands([InstallCommand::class, PruneCommand::class]);
+            $this->commands([InstallCommand::class, PruneCommand::class, GeoIpUpdateCommand::class]);
 
             $this->publishes([
                 __DIR__.'/../config/site-analytics.php' => config_path('site-analytics.php'),

@@ -81,4 +81,16 @@ return [
      */
     'prune_lottery' => [1, 100],
 
+    /**
+     * Country lookup from a local copy of DB-IP's free IP-to-country database. Visitor IPs never leave the server and are not stored.
+     * Download it with "site-analytics:geoip-update" or on the System page. Without the file, no country is recorded.
+     * With auto_update, a page view after the database is max_age_days old downloads a new one once the response is sent.
+     * Behind a proxy or load balancer, configure TrustProxies, or every visitor gets the proxy's country.
+     */
+    'geoip' => [
+        'database' => storage_path('app/site-analytics/countries.mmdb'),
+        'auto_update' => false,
+        'max_age_days' => 35,
+    ],
+
 ];

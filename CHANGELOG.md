@@ -4,6 +4,10 @@ All notable changes to this package. It follows [Semantic Versioning](https://se
 
 ## Unreleased
 
+### Added
+
+- Local IP-to-country database from DB-IP Lite, downloaded with `site-analytics:geoip-update`. Optional monthly `geoip.auto_update` without cron.
+
 ### Changed
 
 - The package's own tabs are always shown. The `navigation` config is now `extra_navigation` and only lists the app's tabs. Remove Overview and Searches from it.
