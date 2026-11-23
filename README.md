@@ -18,7 +18,7 @@ Requires PHP 8.2+ and Laravel 12 or 13. No Tailwind, Flux or asset build needed.
 ```
 
 ```bash
-composer require stifter/site-analytics:^0.3
+composer require stefanstifter/site-analytics:^0.3
 php artisan site-analytics:install
 ```
 

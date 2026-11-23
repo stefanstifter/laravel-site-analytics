@@ -1,5 +1,5 @@
 {
-    "name": "stifter/site-analytics",
+    "name": "stefanstifter/site-analytics",
     "description": "Minimal, privacy-friendly site analytics for Laravel apps.",
     "type": "library",
     "license": "MIT",
