@@ -3,6 +3,7 @@
 namespace Stifter\SiteAnalytics;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -16,7 +17,30 @@ use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
  */
 class EventRecorder
 {
-    public function __construct(private readonly VisitorIdentifier $visitorIdentifier) {}
+    public function __construct(
+        private readonly VisitorIdentifier $visitorIdentifier,
+        private readonly Container $container,
+    ) {}
+
+    /**
+     * Record an event for the current request, e.g. SiteAnalytics::event('outbound_click', $race, ['url' => $url]).
+     *
+     * @param  array<string, mixed>  $properties
+     */
+    public function event(string $name, ?Model $subject = null, array $properties = []): ?AnalyticsEvent
+    {
+        return $this->record($this->currentRequest(), $name, $subject, $properties);
+    }
+
+    /**
+     * Record a search for the current request. See recordSearch().
+     *
+     * @param  array<string, string>  $filters
+     */
+    public function search(string $context, string $term, array $filters = [], int $results = 0): ?AnalyticsEvent
+    {
+        return $this->recordSearch($this->currentRequest(), $context, $term, $filters, $results);
+    }
 
     /**
      * @param  array<string, mixed>  $properties
@@ -121,6 +145,11 @@ class EventRecorder
         }
 
         return str_starts_with($term, $previousTerm) || str_starts_with($previousTerm, $term) ? $previous : null;
+    }
+
+    private function currentRequest(): Request
+    {
+        return $this->container->make('request');
     }
 
     private function pruneExpiredEventsByLottery(): void
