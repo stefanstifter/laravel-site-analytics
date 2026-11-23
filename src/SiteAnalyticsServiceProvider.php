@@ -2,7 +2,6 @@
 
 namespace Stifter\SiteAnalytics;
 
-use Illuminate\Routing\RedirectController;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -29,8 +28,6 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
             ->middleware(config('site-analytics.routes.middleware'))
             ->group(__DIR__.'/../routes/web.php');
 
-        $this->app->booted(fn () => $this->replaceBaseDashboard());
-
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/site-analytics.php' => config_path('site-analytics.php'),
@@ -47,19 +44,5 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('site-analytics', RecordPageView::class);
         $router->aliasMiddleware('analytics', RecordPageView::class);
-    }
-
-    /**
-     * Send andreaselia/analytics' own dashboard to the Overview page, so there is only one analytics area.
-     */
-    private function replaceBaseDashboard(): void
-    {
-        Route::middleware(config('site-analytics.routes.middleware'))->group(function (): void {
-            Route::get(trim((string) config('analytics.prefix'), '/').'/{view?}', RedirectController::class)
-                ->defaults('destination', '/'.trim(config('site-analytics.routes.prefix'), '/'))
-                ->defaults('status', 302)
-                ->where('view', '(.*)')
-                ->name('analytics');
-        });
     }
 }
