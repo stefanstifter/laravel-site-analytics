@@ -1,7 +1,6 @@
 {
     "name": "stifter/site-analytics",
     "description": "Minimal, privacy-friendly site analytics for Laravel apps, built on andreaselia/analytics.",
-    "version": "0.1.0",
     "type": "library",
     "license": "MIT",
     "require": {
