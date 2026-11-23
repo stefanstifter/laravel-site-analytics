@@ -2,7 +2,9 @@
 
 namespace Stifter\SiteAnalytics\Tests\Feature;
 
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Tests\TestCase;
@@ -15,6 +17,27 @@ class ReportPagesTest extends TestCase
     {
         $app['config']->set('site-analytics.routes.middleware', ['web']);
         $app['view']->addLocation(__DIR__.'/../Fixtures/views');
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->actingAs(new User);
+    }
+
+    public function test_guests_are_not_let_in(): void
+    {
+        $this->app['auth']->forgetGuards();
+
+        $this->get('/dashboard/analytics')->assertForbidden();
+    }
+
+    public function test_the_app_decides_who_may_view_the_reports_with_the_gate(): void
+    {
+        Gate::define('viewSiteAnalytics', fn (User $user): bool => false);
+
+        $this->get('/dashboard/analytics')->assertForbidden();
     }
 
     public function test_the_overview_renders_as_a_standalone_page_with_its_own_styles(): void

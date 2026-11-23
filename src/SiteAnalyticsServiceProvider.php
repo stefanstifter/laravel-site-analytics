@@ -2,6 +2,8 @@
 
 namespace Stifter\SiteAnalytics;
 
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +12,11 @@ use Stifter\SiteAnalytics\Http\Middleware\RecordPageView;
 
 class SiteAnalyticsServiceProvider extends ServiceProvider
 {
+    /**
+     * The gate that decides who may open the report pages.
+     */
+    public const GATE = 'viewSiteAnalytics';
+
     private static ?string $css = null;
 
     /**
@@ -33,16 +40,36 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'site-analytics');
         Blade::anonymousComponentPath(__DIR__.'/../resources/views/components', 'site-analytics');
 
-        Route::prefix(config('site-analytics.routes.prefix'))
-            ->name(config('site-analytics.routes.name'))
-            ->middleware(config('site-analytics.routes.middleware'))
-            ->group(__DIR__.'/../routes/web.php');
+        $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__.'/../config/site-analytics.php' => config_path('site-analytics.php'),
             ], 'site-analytics-config');
         }
+    }
+
+    /**
+     * Register the report pages, guarded by the configured middleware and the viewSiteAnalytics gate.
+     */
+    private function registerRoutes(): void
+    {
+        if (! config('site-analytics.routes.enabled', true)) {
+            return;
+        }
+
+        $this->app->booted(function (): void {
+            $gate = $this->app->make(Gate::class);
+
+            if (! $gate->has(self::GATE)) {
+                $gate->define(self::GATE, fn (Authenticatable $user): bool => true);
+            }
+        });
+
+        Route::prefix(config('site-analytics.routes.prefix'))
+            ->name(config('site-analytics.routes.name'))
+            ->middleware([...config('site-analytics.routes.middleware', []), 'can:'.self::GATE])
+            ->group(__DIR__.'/../routes/web.php');
     }
 
     /**

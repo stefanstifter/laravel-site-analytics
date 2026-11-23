@@ -23,12 +23,15 @@ return [
     'ignore_robots' => true,
 
     /**
-     * Admin report pages: URL prefix, route name prefix, middleware and the Blade layout component they render in.
+     * Admin report pages: whether to register them at all, URL prefix, route name prefix and middleware.
+     * Access is also checked with the "viewSiteAnalytics" gate, which lets in any logged-in user unless the app defines it:
+     * Gate::define('viewSiteAnalytics', fn (User $user) => $user->is_admin);
      */
     'routes' => [
+        'enabled' => true,
         'prefix' => 'dashboard/analytics',
         'name' => 'admin.analytics.',
-        'middleware' => ['web', 'auth', 'verified'],
+        'middleware' => ['web', 'auth'],
     ],
 
     /**
