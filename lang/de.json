@@ -7,7 +7,6 @@
     "Data": "Daten",
     "Database": "Datenbank",
     "DB-IP Lite Country from :date": "DB-IP Lite Country vom :date",
-    "Deleted :count expired event.|Deleted :count expired events.": ":count abgelaufenes Ereignis gelöscht.|:count abgelaufene Ereignisse gelöscht.",
     "Events": "Ereignisse",
     "Every page of the :group middleware group": "Alle Seiten der Middleware-Gruppe :group",
     "Excluded paths": "Ausgeschlossene Pfade",
@@ -29,7 +28,6 @@
     "None": "Keine",
     "None yet": "Noch keiner",
     "Not installed": "Nicht installiert",
-    "Now and then while recording events": "Ab und zu beim Erfassen von Ereignissen",
     "Off": "Aus",
     "On": "An",
     "On, after :days days": "An, nach :days Tagen",
@@ -110,5 +108,14 @@
     "Without Results": "Ohne Treffer",
     "Yes": "Ja",
     "Your own visits are not counted while you are logged in.": "Eigene Besuche werden nicht gezählt, solange man angemeldet ist.",
-    "Your request": "Diese Anfrage"
+    "Your request": "Diese Anfrage",
+    ":count expired click|:count expired clicks": ":count abgelaufenen Klick|:count abgelaufene Klicks",
+    ":count expired event|:count expired events": ":count abgelaufenes Ereignis|:count abgelaufene Ereignisse",
+    "Clicks": "Klicks",
+    "Deleted :events and :clicks.": ":events und :clicks gelöscht.",
+    "Last click :time": "Letzter Klick :time",
+    "Marked links and buttons": "Markierte Links und Buttons",
+    "Marked links and buttons, and every link to another site": "Markierte Links und Buttons sowie jeder Link auf eine andere Website",
+    "never": "nie",
+    "Now and then while recording events and clicks": "Ab und zu beim Erfassen von Ereignissen und Klicks"
 }

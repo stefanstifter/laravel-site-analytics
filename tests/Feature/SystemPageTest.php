@@ -150,7 +150,7 @@ class SystemPageTest extends TestCase
 
         $this->post(self::URL.'/prune')
             ->assertRedirect(self::URL)
-            ->assertSessionHas('site-analytics.flash', ['type' => 'success', 'message' => 'Deleted 1 expired event.']);
+            ->assertSessionHas('site-analytics.flash', ['type' => 'success', 'message' => 'Deleted 1 expired event and 0 expired clicks.']);
 
         $this->assertSame([$recent->id], AnalyticsEvent::query()->pluck('id')->all());
     }

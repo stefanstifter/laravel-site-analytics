@@ -17,5 +17,5 @@ Route::get('users', RedirectController::class)
 Route::get('system', [SystemController::class, 'show'])->name('system');
 Route::middleware('can:'.SiteAnalyticsServiceProvider::MANAGE_GATE)->group(function (): void {
     Route::post('system/geoip', [SystemController::class, 'updateCountryDatabase'])->name('system.geoip');
-    Route::post('system/prune', [SystemController::class, 'pruneEvents'])->name('system.prune');
+    Route::post('system/prune', [SystemController::class, 'prune'])->name('system.prune');
 });

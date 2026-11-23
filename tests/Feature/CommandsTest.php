@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
+use Stifter\SiteAnalytics\Models\Click;
 use Stifter\SiteAnalytics\Tests\Concerns\UsesCountryDatabase;
 use Stifter\SiteAnalytics\Tests\TestCase;
 
@@ -22,21 +23,37 @@ class CommandsTest extends TestCase
         $this->setUpCountryDatabase();
     }
 
-    public function test_prune_deletes_only_events_past_their_retention(): void
+    public function test_prune_deletes_only_events_and_clicks_past_their_retention(): void
     {
-        config(['site-analytics.retention_days' => ['search' => 30]]);
+        config(['site-analytics.retention_days' => ['search' => 30], 'site-analytics.clicks.retention_days' => 90]);
 
         $expired = AnalyticsEvent::factory()->create(['name' => 'search', 'created_at' => now()->subDays(31)]);
         $recent = AnalyticsEvent::factory()->create(['name' => 'search', 'created_at' => now()->subDays(29)]);
         $unlisted = AnalyticsEvent::factory()->create(['name' => 'outbound_click', 'created_at' => now()->subYears(2)]);
+        $expiredClicks = Click::factory()->count(2)->create(['created_at' => now()->subDays(91)]);
+        $recentClick = Click::factory()->create(['created_at' => now()->subDays(89)]);
 
         $this->artisan('site-analytics:prune')
-            ->expectsOutputToContain('Deleted 1 expired event.')
+            ->expectsOutputToContain('Deleted 1 expired event and 2 expired clicks.')
             ->assertSuccessful();
 
         $this->assertModelMissing($expired);
         $this->assertModelExists($recent);
         $this->assertModelExists($unlisted);
+        $expiredClicks->each(fn (Click $click) => $this->assertModelMissing($click));
+        $this->assertModelExists($recentClick);
+    }
+
+    public function test_prune_keeps_clicks_without_a_retention(): void
+    {
+        config(['site-analytics.clicks.retention_days' => null]);
+        $click = Click::factory()->create(['created_at' => now()->subYears(5)]);
+
+        $this->artisan('site-analytics:prune')
+            ->expectsOutputToContain('Deleted 0 expired events and 0 expired clicks.')
+            ->assertSuccessful();
+
+        $this->assertModelExists($click);
     }
 
     public function test_install_offers_to_download_the_country_database(): void

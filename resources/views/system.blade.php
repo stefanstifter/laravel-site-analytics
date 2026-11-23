@@ -43,6 +43,16 @@
                     <span class="sa-muted">· {{ __('Your own visits are not counted while you are logged in.') }}</span>
                 @endif
             </dd>
+
+            <dt>{{ __('Clicks') }}</dt>
+            <dd data-click-tracking="{{ $tracking['clicks'] ? 'on' : 'off' }}">
+                @if($tracking['clicks'])
+                    {{ $tracking['outbound_clicks'] ? __('Marked links and buttons, and every link to another site') : __('Marked links and buttons') }}
+                    <span class="sa-muted">· {{ __('Last click :time', ['time' => $tracking['last_click'] ? $ago($tracking['last_click']) : __('never')]) }}</span>
+                @else
+                    {{ __('Off') }}
+                @endif
+            </dd>
         </dl>
         <p class="sa-note">{{ __('Change these in config/site-analytics.php.') }}</p>
     </x-site-analytics::panel>
@@ -127,8 +137,14 @@
                 @endforelse
             </dd>
 
+            <dt>{{ __('Clicks') }}</dt>
+            <dd data-click-count="{{ $data['clicks'] }}">
+                {{ number_format($data['clicks']) }}
+                <span class="sa-muted">· {{ $data['click_retention_days'] === null ? __('kept until deleted') : __('kept :days days', ['days' => $data['click_retention_days']]) }}</span>
+            </dd>
+
             <dt>{{ __('Pruning') }}</dt>
-            <dd>{{ (int) $data['prune_lottery'][0] > 0 ? __('Now and then while recording events') : __('Only by the scheduled command') }}</dd>
+            <dd>{{ (int) $data['prune_lottery'][0] > 0 ? __('Now and then while recording events and clicks') : __('Only by the scheduled command') }}</dd>
         </dl>
 
         <div class="sa-actions">
