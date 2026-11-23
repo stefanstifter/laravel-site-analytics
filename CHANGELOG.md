@@ -2,6 +2,12 @@
 
 All notable changes to this package. It follows [Semantic Versioning](https://semver.org); until 1.0, minor versions may break things.
 
+## Unreleased
+
+### Changed
+
+- The package's own tabs are always shown. The `navigation` config is now `extra_navigation` and only lists the app's tabs. Remove Overview and Searches from it.
+
 ## 0.3.0 - 2026-11-23
 
 ### Added

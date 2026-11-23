@@ -53,12 +53,10 @@ return [
     'dark_mode' => 'media',
 
     /**
-     * Tabs shown on every analytics page, in order. Apps can add their own report pages here; tabs whose route does not exist are skipped.
+     * The app's own report tabs, shown after the package's Overview and Searches tabs. Tabs whose route does not exist are skipped.
+     * E.g. ['label' => 'Races', 'route' => 'admin.analytics.races'].
      */
-    'navigation' => [
-        ['label' => 'Overview', 'route' => 'admin.analytics.overview'],
-        ['label' => 'Searches', 'route' => 'admin.analytics.searches'],
-    ],
+    'extra_navigation' => [],
 
     /**
      * Do not record page views or events for logged-in users (typically the site's own admins).

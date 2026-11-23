@@ -60,11 +60,10 @@ Gate::define('viewSiteAnalytics', fn (User $user) => $user->is_admin);
 
 They render as a standalone page. To show them inside your app, set `layout` to a Blade component such as `'layouts.app'` (it gets a `title` and the page as its slot). Set `dark_mode` to `'class'` if your app switches dark mode with a `.dark` class only, as Flux does. Colours are CSS variables, so `.sa { --sa-accent: #e11d48; }` makes them yours.
 
-To add your own tab, register a route and add it to `navigation`:
+To add your own tab after Overview and Searches, register a route and add it to `extra_navigation`:
 
 ```php
-'navigation' => [
-    ['label' => 'Overview', 'route' => 'admin.analytics.overview'],
+'extra_navigation' => [
     ['label' => 'Races', 'route' => 'admin.analytics.races'],
 ],
 ```
@@ -73,7 +72,7 @@ Build the page with `<x-site-analytics::layout>` and the `stats`, `stat`, `panel
 
 ## Configuration
 
-The usual suspects in `config/site-analytics.php`: `enabled` (env `ANALYTICS_ENABLED`), `track_group`, `exclude`, `ignored_ips`, `ignore_robots`, `ignore_authenticated`, plus route, layout, navigation and retention settings. Each one is documented in the file.
+The usual suspects in `config/site-analytics.php`: `enabled` (env `ANALYTICS_ENABLED`), `track_group`, `exclude`, `ignored_ips`, `ignore_robots`, `ignore_authenticated`, plus route, layout, extra navigation and retention settings. Each one is documented in the file.
 
 Expired events are pruned now and then while recording. To prune on a schedule instead, run `site-analytics:prune` daily and set `prune_lottery` to `[0, 1]`.
 
