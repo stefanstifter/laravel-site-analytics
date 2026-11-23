@@ -5,15 +5,18 @@ namespace Stifter\SiteAnalytics\Tests\Feature;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Stifter\SiteAnalytics\Models\PageView;
+use Stifter\SiteAnalytics\Tests\Concerns\UsesCountryDatabase;
 use Stifter\SiteAnalytics\Tests\TestCase;
 use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
 
 class RecordPageViewTest extends TestCase
 {
     use RefreshDatabase;
+    use UsesCountryDatabase;
 
     private const PHONE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
@@ -37,6 +40,7 @@ class RecordPageViewTest extends TestCase
     {
         parent::setUp();
 
+        $this->setUpCountryDatabase();
         $this->withHeader('User-Agent', self::PHONE_USER_AGENT);
     }
 
@@ -53,10 +57,40 @@ class RecordPageViewTest extends TestCase
         $this->assertSame('localhost', $pageView->host);
         $this->assertNull($pageView->source);
         $this->assertNull($pageView->getAttribute('country'));
+        $this->assertNull($pageView->country_code);
         $this->assertSame(
             ['newsletter', 'email', 'spring', 'ultra', 'header'],
             [$pageView->utm_source, $pageView->utm_medium, $pageView->utm_campaign, $pageView->utm_term, $pageView->utm_content],
         );
+    }
+
+    public function test_it_records_the_country_of_the_visitors_ip_without_storing_the_ip(): void
+    {
+        $this->installFixtureDatabase();
+
+        $this->withServerVariables(['REMOTE_ADDR' => '89.160.20.112'])->get('/about')->assertOk();
+        $this->withServerVariables(['REMOTE_ADDR' => '192.168.1.10'])->get('/about')->assertOk();
+
+        $this->assertSame(['SE', null], PageView::query()->orderBy('id')->pluck('country_code')->all());
+        $this->assertStringNotContainsString('89.160.20.112', PageView::query()->first()->toJson());
+    }
+
+    public function test_with_auto_update_a_recorded_page_view_downloads_a_missing_database_after_the_response(): void
+    {
+        $this->travelTo('2026-11-23');
+        config()->set('site-analytics.geoip.auto_update', true);
+        Http::fake(['download.db-ip.com/*' => Http::response($this->gzippedFixtureDatabase())]);
+
+        $this->get('/feed.json')->assertOk();
+        Http::assertNothingSent();
+
+        $this->get('/about')->assertOk();
+        $this->assertNull(PageView::query()->sole()->country_code);
+        Http::assertSentCount(1);
+
+        $this->withServerVariables(['REMOTE_ADDR' => '89.160.20.112'])->get('/about')->assertOk();
+        $this->assertSame('SE', PageView::query()->latest('id')->first()->country_code);
+        Http::assertSentCount(1);
     }
 
     public function test_root_is_recorded_as_slash(): void

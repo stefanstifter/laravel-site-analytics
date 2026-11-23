@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Stifter\SiteAnalytics\Http\Middleware;
 
 use Closure;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Stifter\SiteAnalytics\Detection\UserAgent;
+use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
+use Stifter\SiteAnalytics\GeoIp\CountryDatabaseUpdater;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Session\SessionHash;
 use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
@@ -22,7 +25,12 @@ final class RecordPageView
 
     private const MAX_LENGTH = 255;
 
-    public function __construct(private readonly VisitorIdentifier $visitorIdentifier) {}
+    public function __construct(
+        private readonly VisitorIdentifier $visitorIdentifier,
+        private readonly CountryDatabase $countries,
+        private readonly CountryDatabaseUpdater $countryUpdater,
+        private readonly Application $app,
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -78,11 +86,14 @@ final class RecordPageView
             'session' => SessionHash::fromRequest($request),
             'visitor' => $this->visitorIdentifier->identify($request),
             'source' => $this->source($request),
+            'country_code' => $this->countries->country($request->ip()),
             'browser' => $agent->browser(),
             'device' => $agent->device(),
             'host' => $request->getHost(),
             ...$this->utmParameters($request),
         ]);
+
+        $this->app->terminating(fn () => $this->countryUpdater->updateIfDue());
     }
 
     /**

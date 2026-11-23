@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Stifter\SiteAnalytics\Database\Factories\PageViewFactory;
 
 /**
- * One recorded page view. The "country" column is kept for existing data but no longer filled.
+ * One recorded page view. The legacy "country" column holds names recorded before 0.4 and is no longer filled.
  *
  * @property string $uri
  * @property string|null $session
  * @property string|null $visitor
  * @property string|null $source
+ * @property string|null $country_code ISO 3166-1 alpha-2, e.g. "AT"
  * @property string|null $browser
  * @property string|null $device
  * @property string|null $host
@@ -27,6 +28,7 @@ class PageView extends Model
         'session',
         'visitor',
         'source',
+        'country_code',
         'browser',
         'device',
         'host',

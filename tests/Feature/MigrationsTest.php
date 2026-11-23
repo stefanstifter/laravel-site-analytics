@@ -10,7 +10,7 @@ use Stifter\SiteAnalytics\Tests\TestCase;
 class MigrationsTest extends TestCase
 {
     private const PAGE_VIEW_COLUMNS = [
-        'id', 'uri', 'session', 'visitor', 'source', 'country', 'browser', 'device', 'host',
+        'id', 'uri', 'session', 'visitor', 'source', 'country', 'country_code', 'browser', 'device', 'host',
         'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'created_at', 'updated_at',
     ];
 
@@ -55,7 +55,7 @@ class MigrationsTest extends TestCase
         $this->assertSame(['/', '/about'], DB::table('page_views')->orderBy('id')->pluck('uri')->all());
     }
 
-    public function test_install_upgrading_from_0_1_runs_no_page_view_migration(): void
+    public function test_install_upgrading_from_0_3_only_adds_the_country_code(): void
     {
         $this->createAndreaseliaPageViewsTable(withVisitor: true);
         $this->recordMigrations([
@@ -67,8 +67,9 @@ class MigrationsTest extends TestCase
 
         $this->artisan('migrate')->assertSuccessful();
 
-        $this->assertSame(0, DB::table('migrations')->where('batch', 2)->count());
-        $this->assertSame(2, DB::table('page_views')->count());
+        $this->assertSame(['2026_11_23_200000_add_country_code_to_page_views_table'], DB::table('migrations')->where('batch', 2)->pluck('migration')->all());
+        $this->assertEqualsCanonicalizing(self::PAGE_VIEW_COLUMNS, Schema::getColumnListing('page_views'));
+        $this->assertSame(['Germany', null], DB::table('page_views')->orderBy('id')->pluck('country')->all());
     }
 
     public function test_existing_table_without_recorded_migrations_is_left_in_place(): void
