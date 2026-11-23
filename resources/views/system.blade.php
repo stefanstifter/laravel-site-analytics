@@ -104,4 +104,41 @@
 
         <p class="sa-note">{!! __('IP geolocation by :link', ['link' => '<a href="https://db-ip.com" target="_blank" rel="noopener">DB-IP</a>']) !!}</p>
     </x-site-analytics::panel>
+
+    <x-site-analytics::panel :title="__('Data')" data-panel="data">
+        <dl class="sa-facts">
+            <dt>{{ __('Page views') }}</dt>
+            <dd data-page-view-count="{{ $data['page_views'] }}">
+                {{ number_format($data['page_views']) }}
+                @if($data['first_page_view'])
+                    <span class="sa-muted">· {{ __('since :date, kept until deleted', ['date' => $date($data['first_page_view'])]) }}</span>
+                @endif
+            </dd>
+
+            <dt>{{ __('Events') }}</dt>
+            <dd>
+                @forelse($data['events'] as $name => $total)
+                    <div data-event="{{ $name }}" data-event-count="{{ $total }}">
+                        <span class="sa-code">{{ $name }}</span> {{ number_format($total) }}
+                        <span class="sa-muted">· {{ isset($data['retention_days'][$name]) ? __('kept :days days', ['days' => $data['retention_days'][$name]]) : __('kept until deleted') }}</span>
+                    </div>
+                @empty
+                    {{ __('None yet') }}
+                @endforelse
+            </dd>
+
+            <dt>{{ __('Pruning') }}</dt>
+            <dd>{{ (int) $data['prune_lottery'][0] > 0 ? __('Now and then while recording events') : __('Only by the scheduled command') }}</dd>
+        </dl>
+
+        <div class="sa-actions">
+            @if($canManage)
+                <form method="POST" action="{{ route(config('site-analytics.routes.name').'system.prune') }}">
+                    @csrf
+                    <button type="submit" class="sa-button" data-action="prune">{{ __('Prune now') }}</button>
+                </form>
+            @endif
+            <span class="sa-muted">{{ $canManage ? __('or run') : __('Run') }} <code class="sa-code">php artisan site-analytics:prune</code></span>
+        </div>
+    </x-site-analytics::panel>
 </x-site-analytics::layout>

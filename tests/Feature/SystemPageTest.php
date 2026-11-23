@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
+use Stifter\SiteAnalytics\Models\AnalyticsEvent;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Tests\Concerns\UsesCountryDatabase;
 use Stifter\SiteAnalytics\Tests\TestCase;
@@ -124,17 +125,51 @@ class SystemPageTest extends TestCase
             ->assertSee('data-geoip-error', false);
     }
 
+    public function test_it_shows_stored_data_and_how_long_it_is_kept(): void
+    {
+        config(['site-analytics.retention_days' => ['search' => 365]]);
+        PageView::factory()->create(['created_at' => '2026-03-14 12:00:00']);
+        PageView::factory()->create();
+        AnalyticsEvent::factory()->count(2)->create(['name' => 'search']);
+        AnalyticsEvent::factory()->create(['name' => 'outbound_click']);
+
+        $this->get(self::URL)
+            ->assertOk()
+            ->assertSee('data-page-view-count="2"', false)
+            ->assertSee('since Mar 14, 2026, kept until deleted')
+            ->assertSee('data-event="search" data-event-count="2"', false)
+            ->assertSee('kept 365 days')
+            ->assertSee('data-event="outbound_click" data-event-count="1"', false);
+    }
+
+    public function test_prune_now_deletes_expired_events(): void
+    {
+        config(['site-analytics.retention_days' => ['search' => 30]]);
+        AnalyticsEvent::factory()->create(['name' => 'search', 'created_at' => now()->subDays(31)]);
+        $recent = AnalyticsEvent::factory()->create(['name' => 'search']);
+
+        $this->post(self::URL.'/prune')
+            ->assertRedirect(self::URL)
+            ->assertSessionHas('site-analytics.flash', ['type' => 'success', 'message' => 'Deleted 1 expired event.']);
+
+        $this->assertSame([$recent->id], AnalyticsEvent::query()->pluck('id')->all());
+    }
+
     public function test_the_manage_gate_keeps_viewers_from_running_actions(): void
     {
         Gate::define('manageSiteAnalytics', fn (User $user): bool => false);
         Http::fake();
+        $event = AnalyticsEvent::factory()->create(['name' => 'search', 'created_at' => now()->subYears(2)]);
 
         $this->get(self::URL)
             ->assertOk()
-            ->assertDontSee('data-action="geoip-update"', false)
-            ->assertSee('php artisan site-analytics:geoip-update');
+            ->assertDontSee('data-action=', false)
+            ->assertSee('php artisan site-analytics:geoip-update')
+            ->assertSee('php artisan site-analytics:prune');
         $this->post(self::URL.'/geoip')->assertForbidden();
+        $this->post(self::URL.'/prune')->assertForbidden();
 
         Http::assertNothingSent();
+        $this->assertModelExists($event);
     }
 }

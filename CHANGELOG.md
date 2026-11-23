@@ -9,7 +9,7 @@ All notable changes to this package. It follows [Semantic Versioning](https://se
 - Local IP-to-country database from DB-IP Lite, downloaded with `site-analytics:geoip-update`. Optional monthly `geoip.auto_update` without cron.
 - Page views record the visitor's country in a new `country_code` column (ISO code, e.g. `AT`). The IP is not stored. Run the migrations.
 - Countries panel on the Overview, with flags and names in the app locale.
-- System page: what is tracked, the country database's state and an "Update now" button.
+- System page: what is tracked, the country database's state and stored data, with "Update now" and "Prune now" buttons.
 - `manageSiteAnalytics` gate for the System page actions. Falls back to `viewSiteAnalytics`.
 
 ### Changed

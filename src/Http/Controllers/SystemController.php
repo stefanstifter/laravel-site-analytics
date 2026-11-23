@@ -9,10 +9,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Stifter\SiteAnalytics\EventRecorder;
 use Stifter\SiteAnalytics\GeoIp\Country;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabaseUpdateFailed;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabaseUpdater;
+use Stifter\SiteAnalytics\Models\AnalyticsEvent;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\SiteAnalyticsServiceProvider;
 
@@ -59,7 +61,21 @@ final class SystemController
                 'coverage' => $this->coverage(),
                 ...$countryStatus,
             ],
+            'data' => [
+                'page_views' => PageView::query()->count(),
+                'first_page_view' => PageView::query()->min('created_at'),
+                'events' => AnalyticsEvent::query()->toBase()->selectRaw('name, COUNT(*) as total')->groupBy('name')->orderBy('name')->pluck('total', 'name'),
+                'retention_days' => config('site-analytics.retention_days', []),
+                'prune_lottery' => config('site-analytics.prune_lottery', [1, 100]),
+            ],
         ]);
+    }
+
+    public function pruneEvents(EventRecorder $recorder): RedirectResponse
+    {
+        $deleted = $recorder->pruneExpiredEvents();
+
+        return $this->back('success', trans_choice('Deleted :count expired event.|Deleted :count expired events.', $deleted, ['count' => $deleted]));
     }
 
     public function updateCountryDatabase(): RedirectResponse
