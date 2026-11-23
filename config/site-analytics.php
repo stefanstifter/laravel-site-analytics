@@ -79,6 +79,7 @@ return [
 
     /**
      * Chance that recording an event also deletes expired events: [hits, out of]. Works without a scheduler.
+     * If you schedule "site-analytics:prune" instead, set this to [0, 1].
      */
     'prune_lottery' => [1, 100],
 

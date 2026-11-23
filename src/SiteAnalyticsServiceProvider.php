@@ -10,6 +10,8 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Stifter\SiteAnalytics\Console\InstallCommand;
+use Stifter\SiteAnalytics\Console\PruneCommand;
 use Stifter\SiteAnalytics\Http\Middleware\RecordPageView;
 
 class SiteAnalyticsServiceProvider extends ServiceProvider
@@ -46,6 +48,8 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
         $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
+            $this->commands([InstallCommand::class, PruneCommand::class]);
+
             $this->publishes([
                 __DIR__.'/../config/site-analytics.php' => config_path('site-analytics.php'),
             ], 'site-analytics-config');
