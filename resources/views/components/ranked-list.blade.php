@@ -9,7 +9,7 @@
 @else
     <ol {{ $attributes->merge(['class' => 'sa-list']) }}>
         @foreach($items as $item)
-            <li data-ranked-item="{{ $item['label'] }}" data-visitors="{{ $item['visitors'] }}" data-page-views="{{ $item['page_views'] }}">
+            <li data-ranked-item="{{ $item['key'] ?? $item['label'] }}" data-visitors="{{ $item['visitors'] }}" data-page-views="{{ $item['page_views'] }}">
                 <x-site-analytics::bar
                     :label="$item['label']"
                     :value="number_format($item['visitors'])"

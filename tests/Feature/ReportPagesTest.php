@@ -43,7 +43,7 @@ class ReportPagesTest extends TestCase
 
     public function test_the_overview_renders_as_a_standalone_page_with_its_own_styles(): void
     {
-        PageView::factory()->create(['visitor' => 'a', 'uri' => '/pricing', 'source' => 'example.org']);
+        PageView::factory()->create(['visitor' => 'a', 'uri' => '/pricing', 'source' => 'example.org', 'country_code' => 'AT']);
 
         $response = $this->get('/dashboard/analytics?period=7');
 
@@ -54,6 +54,8 @@ class ReportPagesTest extends TestCase
             ->assertSee('data-selected-period="7"', false)
             ->assertSee('data-ranked-item="/pricing"', false)
             ->assertSee('href="https://example.org"', false)
+            ->assertSee('data-ranked-item="AT"', false)
+            ->assertSee('<a href="https://db-ip.com"', false)
             ->assertSee('aria-current="page"', false)
             ->assertDontSee('<flux:', false);
 

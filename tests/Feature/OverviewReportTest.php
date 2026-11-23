@@ -32,4 +32,20 @@ class OverviewReportTest extends TestCase
         $this->assertSame(['/' => 3, '/about' => 1], $data['pages']->pluck('visitors', 'label')->all());
         $this->assertSame(['google.com' => 1], $data['referrers']->pluck('visitors', 'label')->all());
     }
+
+    public function test_it_ranks_countries_by_visitors_with_unknown_ones_grouped(): void
+    {
+        $this->app->setLocale('de');
+        PageView::factory()->count(2)->create(['visitor' => 'a', 'country_code' => 'AT']);
+        PageView::factory()->create(['visitor' => 'b', 'country_code' => 'AT']);
+        PageView::factory()->create(['visitor' => 'c', 'country_code' => 'DE']);
+        PageView::factory()->create(['visitor' => 'd', 'country_code' => null]);
+        PageView::factory()->create(['visitor' => 'e', 'country_code' => null]);
+
+        $countries = app(OverviewController::class)(Request::create('/'))->getData()['countries'];
+
+        $this->assertSame(['AT' => 2, 'unknown' => 2, 'DE' => 1], $countries->pluck('visitors', 'key')->all());
+        $this->assertSame(['🇦🇹 Österreich', 'Unbekannt', '🇩🇪 Deutschland'], $countries->pluck('label')->all());
+        $this->assertSame([3, 2, 1], $countries->pluck('page_views')->all());
+    }
 }

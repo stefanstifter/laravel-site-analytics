@@ -37,6 +37,12 @@
             <x-site-analytics::ranked-list :items="$referrers" :empty="__('No visitors arrived from other sites in this period.')" :link="fn (string $host): ?string => str_contains($host, '://') ? null : 'https://'.$host" />
         </x-site-analytics::panel>
 
+        <x-site-analytics::panel :title="__('Countries')" data-panel="countries">
+            <x-slot:actions><span class="sa-caps">{{ __('Visitors') }}</span></x-slot:actions>
+            <x-site-analytics::ranked-list :items="$countries" :empty="__('No visits in this period.')" />
+            <p class="sa-note">{!! __('IP geolocation by :link', ['link' => '<a href="https://db-ip.com" target="_blank" rel="noopener">DB-IP</a>']) !!}</p>
+        </x-site-analytics::panel>
+
         <x-site-analytics::panel :title="__('Devices')" data-devices>
             <div class="sa-stack">
                 @forelse($devices as $device)

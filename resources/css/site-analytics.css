@@ -184,6 +184,12 @@
     text-transform: uppercase;
 }
 
+.sa-note {
+    margin-top: 1rem;
+    color: var(--sa-faint);
+    font-size: 0.75rem;
+}
+
 /* Stat cards */
 
 .sa-stats {

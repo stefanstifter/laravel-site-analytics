@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Stifter\SiteAnalytics\GeoIp\Country;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Reports\AnalyticsPeriod;
@@ -51,6 +52,8 @@ class OverviewController
             'pages' => $this->ranked($period->humanPageViews()->select('uri as label')->groupBy('uri')),
             'referrers' => $this->ranked($period->humanPageViews()->select('source as label')->whereNotNull('source')->where('source', '!=', '')->groupBy('source')),
             'campaigns' => $this->campaigns($period),
+            'countries' => $this->ranked($period->humanPageViews()->select('country_code as label')->groupBy('country_code'))
+                ->map(fn (array $row): array => [...$row, 'key' => $row['label'] ?: 'unknown', 'label' => Country::label($row['label'] ?: null)]),
             'summary' => [
                 'total_visitors' => $days->sum('visitors'),
                 'average_daily_visitors' => round($days->avg('visitors') ?? 0, 1),
