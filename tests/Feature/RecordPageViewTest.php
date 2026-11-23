@@ -31,8 +31,6 @@ class RecordPageViewTest extends TestCase
             Route::get('feed.json', fn (): array => ['items' => []]);
             Route::get('sitemap.xml', fn () => response('<urlset/>', 200, ['Content-Type' => 'application/xml']));
         });
-
-        Route::middleware(['web', 'analytics'])->get('legacy', fn (): string => 'legacy');
     }
 
     protected function setUp(): void
@@ -75,13 +73,6 @@ class RecordPageViewTest extends TestCase
         $pageView = PageView::query()->sole();
         $this->assertSame(str_repeat('ü', 255), $pageView->utm_campaign);
         $this->assertNull($pageView->utm_source);
-    }
-
-    public function test_the_legacy_analytics_alias_still_records(): void
-    {
-        $this->get('/legacy')->assertOk();
-
-        $this->assertSame('/legacy', PageView::query()->sole()->uri);
     }
 
     /**

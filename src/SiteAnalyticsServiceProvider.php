@@ -80,14 +80,13 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the page view middleware as "site-analytics", and add it to the configured middleware group. The "analytics" alias keeps routes written for andreaselia/analytics working and will be removed in the next release.
+     * Register the page view middleware as "site-analytics", and add it to the configured middleware group.
      */
     private function registerMiddleware(): void
     {
         $router = $this->app->make(Router::class);
 
         $router->aliasMiddleware('site-analytics', RecordPageView::class);
-        $router->aliasMiddleware('analytics', RecordPageView::class);
 
         if (! is_string($group = config('site-analytics.track_group')) || $group === '') {
             return;
