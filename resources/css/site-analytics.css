@@ -49,11 +49,11 @@
     box-sizing: inherit;
 }
 
-.sa :is(h1, h2, h3, p, ol, ul, figure) {
+:where(.sa) :is(h1, h2, h3, p, ol, ul, figure) {
     margin: 0;
 }
 
-.sa a {
+:where(.sa) a {
     color: inherit;
 }
 
