@@ -6,15 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    private const INDEX = 'page_views_created_at_visitor_index';
+
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::table('page_views', function (Blueprint $table) {
-            $table->string('visitor', 64)->nullable()->after('session');
-            $table->index(['created_at', 'visitor'], 'page_views_created_at_visitor_index');
-        });
+        if (! Schema::hasColumn('page_views', 'visitor')) {
+            Schema::table('page_views', function (Blueprint $table) {
+                $table->string('visitor', 64)->nullable()->after('session');
+            });
+        }
+
+        if (! Schema::hasIndex('page_views', self::INDEX)) {
+            Schema::table('page_views', function (Blueprint $table) {
+                $table->index(['created_at', 'visitor'], self::INDEX);
+            });
+        }
     }
 
     /**
@@ -23,7 +32,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('page_views', function (Blueprint $table) {
-            $table->dropIndex('page_views_created_at_visitor_index');
+            $table->dropIndex(self::INDEX);
             $table->dropColumn('visitor');
         });
     }
