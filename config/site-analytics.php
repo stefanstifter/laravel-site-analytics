@@ -8,6 +8,12 @@ return [
     'enabled' => env('ANALYTICS_ENABLED', true),
 
     /**
+     * Middleware group whose pages are all recorded, e.g. 'web'. Null records only routes using the "site-analytics" middleware.
+     * Either way only successful HTML responses to GET requests count; use "exclude" to leave out admin and login pages.
+     */
+    'track_group' => null,
+
+    /**
      * Paths not recorded as page views, as accepted by $request->is(), e.g. 'dashboard' and 'dashboard/*'. Full URLs work too.
      */
     'exclude' => [],

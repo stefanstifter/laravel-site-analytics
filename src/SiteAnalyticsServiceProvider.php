@@ -4,6 +4,8 @@ namespace Stifter\SiteAnalytics;
 
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Http\Kernel as HttpKernel;
+use Illuminate\Foundation\Http\Kernel as FoundationHttpKernel;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
@@ -73,7 +75,7 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the page view middleware as "site-analytics". The "analytics" alias keeps routes written for andreaselia/analytics working and will be removed in the next release.
+     * Register the page view middleware as "site-analytics", and add it to the configured middleware group. The "analytics" alias keeps routes written for andreaselia/analytics working and will be removed in the next release.
      */
     private function registerMiddleware(): void
     {
@@ -81,5 +83,17 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
 
         $router->aliasMiddleware('site-analytics', RecordPageView::class);
         $router->aliasMiddleware('analytics', RecordPageView::class);
+
+        if (! is_string($group = config('site-analytics.track_group')) || $group === '') {
+            return;
+        }
+
+        $kernel = $this->app->make(HttpKernel::class);
+
+        if ($kernel instanceof FoundationHttpKernel) {
+            $kernel->appendMiddlewareToGroup($group, RecordPageView::class);
+        } else {
+            $router->pushMiddlewareToGroup($group, RecordPageView::class);
+        }
     }
 }
