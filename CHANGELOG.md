@@ -15,6 +15,7 @@ All notable changes to this package. It follows [Semantic Versioning](https://se
 ### Changed
 
 - The package's own tabs are always shown. The `navigation` config is now `extra_navigation` and only lists the app's tabs. Remove Overview and Searches from it.
+- The `line-chart` component takes points with `value` and `tooltip`, built by `Reports\DailyChart::build()`. Its points carry `data-chart-value` instead of `data-chart-visitors`.
 
 ### Fixed
 
