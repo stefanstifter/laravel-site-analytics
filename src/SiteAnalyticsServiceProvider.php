@@ -2,18 +2,24 @@
 
 namespace Stifter\SiteAnalytics;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Kernel as FoundationHttpKernel;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Stifter\SiteAnalytics\Console\GeoIpUpdateCommand;
 use Stifter\SiteAnalytics\Console\InstallCommand;
 use Stifter\SiteAnalytics\Console\PruneCommand;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
+use Stifter\SiteAnalytics\Http\Controllers\RecordClickController;
 use Stifter\SiteAnalytics\Http\Middleware\RecordPageView;
 
 class SiteAnalyticsServiceProvider extends ServiceProvider
@@ -27,6 +33,16 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
      * The gate that decides who may run the admin actions on the System page. Falls back to GATE.
      */
     public const MANAGE_GATE = 'manageSiteAnalytics';
+
+    /**
+     * The route the browser script sends clicks to.
+     */
+    public const CLICK_ROUTE = 'site-analytics.clicks.store';
+
+    /**
+     * Clicks one IP address may send per minute.
+     */
+    public const CLICKS_PER_MINUTE = 60;
 
     private static ?string $css = null;
 
@@ -54,6 +70,7 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
         $this->loadJsonTranslationsFrom(__DIR__.'/../lang');
         Blade::anonymousComponentPath(__DIR__.'/../resources/views/components', 'site-analytics');
 
+        $this->registerClickRoute();
         $this->registerRoutes();
 
         if ($this->app->runningInConsole()) {
@@ -90,6 +107,25 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
             ->name(config('site-analytics.routes.name'))
             ->middleware([...config('site-analytics.routes.middleware', []), 'can:'.self::GATE])
             ->group(__DIR__.'/../routes/web.php');
+    }
+
+    /**
+     * Register the endpoint the browser script sends clicks to. It runs in the "web" group so sessions and logged-in users are known,
+     * but without CSRF protection: sendBeacon cannot send the token header, and cached pages would carry stale tokens.
+     * A click can only add one validated row, and each IP is limited to CLICKS_PER_MINUTE.
+     */
+    private function registerClickRoute(): void
+    {
+        if (! config('site-analytics.clicks.enabled', true)) {
+            return;
+        }
+
+        RateLimiter::for('site-analytics-clicks', fn (Request $request): Limit => Limit::perMinute(self::CLICKS_PER_MINUTE)->by((string) $request->ip()));
+
+        Route::post('site-analytics/clicks', RecordClickController::class)
+            ->middleware(['web', 'throttle:site-analytics-clicks'])
+            ->withoutMiddleware(array_values(array_filter([PreventRequestForgery::class, ValidateCsrfToken::class], 'class_exists')))
+            ->name(self::CLICK_ROUTE);
     }
 
     /**

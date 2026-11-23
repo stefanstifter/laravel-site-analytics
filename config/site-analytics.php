@@ -29,6 +29,18 @@ return [
     'ignore_robots' => true,
 
     /**
+     * Clicks on links and buttons, sent by <x-site-analytics::script /> in your layout and shown on the Clicks tab.
+     * Mark what to count with data-track-group="Side projects" on a container, or data-track="Hero CTA" on a single link.
+     * With "outbound", every link that leaves the site (other hosts, mailto: and tel:) counts too, without markup.
+     * The same rules as for page views apply: bots, ignored IPs, excluded paths and, by default, logged-in users are not recorded.
+     */
+    'clicks' => [
+        'enabled' => true,
+        'outbound' => true,
+        'retention_days' => 365,
+    ],
+
+    /**
      * Admin report pages: whether to register them at all, URL prefix, route name prefix and middleware.
      * Access is also checked with the "viewSiteAnalytics" gate, which lets in any logged-in user unless the app defines it:
      * Gate::define('viewSiteAnalytics', fn (User $user) => $user->is_admin);
@@ -76,7 +88,7 @@ return [
     ],
 
     /**
-     * Chance that recording an event also deletes expired events: [hits, out of]. Works without a scheduler.
+     * Chance that recording an event or click also deletes expired ones: [hits, out of]. Works without a scheduler.
      * If you schedule "site-analytics:prune" instead, set this to [0, 1].
      */
     'prune_lottery' => [1, 100],

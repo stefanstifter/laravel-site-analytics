@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Stifter\SiteAnalytics\Detection\UserAgent;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
+use Stifter\SiteAnalytics\Models\Click;
 use Stifter\SiteAnalytics\Session\SessionHash;
 use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
 
@@ -40,6 +41,14 @@ class EventRecorder
     public function search(string $context, string $term, array $filters = [], int $results = 0): ?AnalyticsEvent
     {
         return $this->recordSearch($this->currentRequest(), $context, $term, $filters, $results);
+    }
+
+    /**
+     * Record a click for the current request, e.g. SiteAnalytics::click('AI Agent', 'Side projects', $url), for links the browser script cannot see, such as redirects.
+     */
+    public function click(string $label, ?string $group = null, ?string $href = null): ?Click
+    {
+        return $this->container->make(ClickRecorder::class)->record($this->currentRequest(), $label, $group, $href);
     }
 
     /**

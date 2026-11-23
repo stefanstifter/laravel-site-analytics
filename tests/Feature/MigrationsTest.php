@@ -32,6 +32,7 @@ class MigrationsTest extends TestCase
         $this->assertEqualsCanonicalizing(self::PAGE_VIEW_COLUMNS, Schema::getColumnListing('page_views'));
         $this->assertTrue(Schema::hasIndex('page_views', 'page_views_created_at_visitor_index'));
         $this->assertTrue(Schema::hasTable('analytics_events'));
+        $this->assertTrue(Schema::hasTable('analytics_clicks'));
     }
 
     public function test_fresh_database_can_be_rolled_back(): void
@@ -41,6 +42,7 @@ class MigrationsTest extends TestCase
 
         $this->assertFalse(Schema::hasTable('page_views'));
         $this->assertFalse(Schema::hasTable('analytics_events'));
+        $this->assertFalse(Schema::hasTable('analytics_clicks'));
     }
 
     public function test_install_upgrading_from_andreaselia_keeps_its_page_views_and_gains_the_visitor_column(): void
@@ -55,7 +57,7 @@ class MigrationsTest extends TestCase
         $this->assertSame(['/', '/about'], DB::table('page_views')->orderBy('id')->pluck('uri')->all());
     }
 
-    public function test_install_upgrading_from_0_3_only_adds_the_country_code(): void
+    public function test_install_upgrading_from_0_3_only_adds_the_country_code_and_the_clicks_table(): void
     {
         $this->createAndreaseliaPageViewsTable(withVisitor: true);
         $this->recordMigrations([
@@ -67,7 +69,10 @@ class MigrationsTest extends TestCase
 
         $this->artisan('migrate')->assertSuccessful();
 
-        $this->assertSame(['2026_11_23_200000_add_country_code_to_page_views_table'], DB::table('migrations')->where('batch', 2)->pluck('migration')->all());
+        $this->assertSame([
+            '2026_11_23_200000_add_country_code_to_page_views_table',
+            '2026_11_24_100000_create_analytics_clicks_table',
+        ], DB::table('migrations')->where('batch', 2)->pluck('migration')->all());
         $this->assertEqualsCanonicalizing(self::PAGE_VIEW_COLUMNS, Schema::getColumnListing('page_views'));
         $this->assertSame(['Germany', null], DB::table('page_views')->orderBy('id')->pluck('country')->all());
     }
