@@ -9,7 +9,7 @@ Privacy-friendly page view and event tracking for Laravel, with report pages bui
 
 ## Installation
 
-Requires PHP 8.2+, Laravel 12 and `livewire/flux` ^2.1.
+Requires PHP 8.2+, Laravel 12 or 13 and `livewire/flux` ^2.1.
 
 ```json
 "repositories": [
