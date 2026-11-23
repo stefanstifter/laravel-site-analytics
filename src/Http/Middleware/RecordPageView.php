@@ -7,12 +7,12 @@ namespace Stifter\SiteAnalytics\Http\Middleware;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Stifter\SiteAnalytics\Detection\UserAgent;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabaseUpdater;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Session\SessionHash;
+use Stifter\SiteAnalytics\Support\Host;
 use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -111,26 +111,9 @@ final class RecordPageView
             return mb_substr($referrer, 0, self::MAX_LENGTH);
         }
 
-        $source = $this->normalizeHost(parse_url($referrer, PHP_URL_HOST));
+        $source = Host::normalize(parse_url($referrer, PHP_URL_HOST));
 
-        return $source === null || $this->isOwnHost($source, $request) ? null : $source;
-    }
-
-    private function isOwnHost(string $source, Request $request): bool
-    {
-        return in_array($source, [
-            $this->normalizeHost($request->getHost()),
-            $this->normalizeHost(parse_url((string) config('app.url'), PHP_URL_HOST)),
-        ], true);
-    }
-
-    private function normalizeHost(string|false|null $host): ?string
-    {
-        if (! is_string($host) || $host === '') {
-            return null;
-        }
-
-        return Str::of($host)->lower()->chopStart('www.')->toString();
+        return $source === null || Host::isOwn($source, $request) ? null : $source;
     }
 
     /**
