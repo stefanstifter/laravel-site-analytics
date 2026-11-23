@@ -57,21 +57,9 @@ Build the page with `<x-site-analytics::layout>`, `stats`, `stat` and `panel` co
 
 The usual suspects in `config/site-analytics.php`: `enabled` (env `ANALYTICS_ENABLED`), `exclude`, `ignored_ips`, `ignore_robots`, `ignore_authenticated`, plus route, layout, navigation and retention settings. Each one is documented in the file.
 
-## Upgrading from 0.1
-
-0.2 stands on its own feet. Existing data and migrations stay untouched.
-
-1. `composer require stifter/site-analytics:^0.2` (andreaselia/analytics and friends leave quietly).
-2. Move your settings from `config/analytics.php` to `config/site-analytics.php` (`ignoredIPs` → `ignored_ips`, `ignoreRobots` → `ignore_robots`, `exclude` should list your admin paths), then delete the old file.
-3. Change `middleware('analytics')` to `middleware('site-analytics')`. The old alias works for one more release.
-4. Replace `AndreasElia\Analytics\Models\PageView` with `Stifter\SiteAnalytics\Models\PageView`, including in migrations.
-5. Drop tests for `RequestSessionProvider`, `analytics.session.provider` and the `/analytics` redirect. They are gone.
-
-`country` is no longer filled. It was the browser language all along, which is a fun fact but not a country.
-
 ## Thanks
 
-This package started life on top of [andreaselia/laravel-analytics](https://github.com/andreaselia/laravel-analytics) by Andreas Elia and Tom Irons. It showed the way; we just packed lighter. Thank you!
+This package started life on top of [andreaselia/laravel-analytics](https://github.com/andreaselia/laravel-analytics). It showed the way. Thank you!
 
 ## License
 
