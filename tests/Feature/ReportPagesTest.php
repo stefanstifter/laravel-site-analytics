@@ -62,7 +62,7 @@ class ReportPagesTest extends TestCase
         $this->assertSame(1, substr_count($response->getContent(), 'data-site-analytics-styles'));
     }
 
-    public function test_app_tabs_follow_the_package_tabs_and_keep_the_selected_period(): void
+    public function test_app_tabs_sit_between_the_reports_and_system_and_keep_the_selected_period(): void
     {
         Route::get('dashboard/analytics/races', fn (): string => 'races')->name('admin.analytics.races');
         config(['site-analytics.extra_navigation' => [
@@ -73,7 +73,7 @@ class ReportPagesTest extends TestCase
         $response = $this->get('/dashboard/analytics?period=7')->assertOk();
 
         preg_match_all('/data-tab="([^"]+)"/', $response->getContent(), $tabs);
-        $this->assertSame(['admin.analytics.overview', 'admin.analytics.searches', 'admin.analytics.races'], $tabs[1]);
+        $this->assertSame(['admin.analytics.overview', 'admin.analytics.searches', 'admin.analytics.races', 'admin.analytics.system'], $tabs[1]);
         $response->assertSee('href="http://localhost/dashboard/analytics/races?period=7"', false);
     }
 

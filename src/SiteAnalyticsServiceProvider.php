@@ -23,6 +23,11 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
      */
     public const GATE = 'viewSiteAnalytics';
 
+    /**
+     * The gate that decides who may run the admin actions on the System page. Falls back to GATE.
+     */
+    public const MANAGE_GATE = 'manageSiteAnalytics';
+
     private static ?string $css = null;
 
     /**
@@ -74,6 +79,10 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
 
             if (! $gate->has(self::GATE)) {
                 $gate->define(self::GATE, fn (Authenticatable $user): bool => true);
+            }
+
+            if (! $gate->has(self::MANAGE_GATE)) {
+                $gate->define(self::MANAGE_GATE, fn (Authenticatable $user): bool => $gate->forUser($user)->allows(self::GATE));
             }
         });
 
