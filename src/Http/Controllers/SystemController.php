@@ -46,11 +46,7 @@ final class SystemController
                 'last_page_view' => PageView::query()->latest('id')->value('created_at'),
             ],
             'geoip' => [
-                'state' => match (true) {
-                    ! $this->countries->exists() => 'missing',
-                    $this->countries->isOutdated() => 'outdated',
-                    default => 'ok',
-                },
+                'state' => $this->countries->state(),
                 'built_at' => $this->countries->builtAt(),
                 'size' => $this->countries->size(),
                 'path' => $this->countries->path(),

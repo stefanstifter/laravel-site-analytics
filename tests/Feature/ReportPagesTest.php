@@ -77,6 +77,19 @@ class ReportPagesTest extends TestCase
         $response->assertSee('href="http://localhost/dashboard/analytics/races?period=7"', false);
     }
 
+    public function test_the_countries_panel_points_to_the_system_page_while_the_database_is_missing(): void
+    {
+        config(['site-analytics.geoip.database' => '/nonexistent/countries.mmdb']);
+
+        $this->get('/dashboard/analytics')
+            ->assertOk()
+            ->assertSeeInOrder([
+                'data-country-database="missing"',
+                'No countries are recorded until the country database is installed.',
+                '<a href="http://localhost/dashboard/analytics/system" wire:navigate>Open System',
+            ], false);
+    }
+
     public function test_the_searches_page_renders(): void
     {
         AnalyticsEvent::factory()->create([

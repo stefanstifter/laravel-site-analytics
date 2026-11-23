@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Stifter\SiteAnalytics\GeoIp\Country;
+use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Reports\AnalyticsPeriod;
@@ -24,6 +25,8 @@ class OverviewController
     ];
 
     private const LIST_LIMIT = 10;
+
+    public function __construct(private readonly CountryDatabase $countryDatabase) {}
 
     public function __invoke(Request $request): View
     {
@@ -54,6 +57,7 @@ class OverviewController
             'campaigns' => $this->campaigns($period),
             'countries' => $this->ranked($period->humanPageViews()->select('country_code as label')->groupBy('country_code'))
                 ->map(fn (array $row): array => [...$row, 'key' => $row['label'] ?: 'unknown', 'label' => Country::label($row['label'] ?: null)]),
+            'countryDatabase' => $this->countryDatabase->state(),
             'summary' => [
                 'total_visitors' => $days->sum('visitors'),
                 'average_daily_visitors' => round($days->avg('visitors') ?? 0, 1),

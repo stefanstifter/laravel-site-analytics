@@ -39,6 +39,14 @@
 
         <x-site-analytics::panel :title="__('Countries')" data-panel="countries">
             <x-slot:actions><span class="sa-caps">{{ __('Visitors') }}</span></x-slot:actions>
+            @if($countryDatabase !== 'ok')
+                <p class="sa-lead" data-country-database="{{ $countryDatabase }}">
+                    {{ $countryDatabase === 'missing' ? __('No countries are recorded until the country database is installed.') : __('The country database is outdated, so some countries may be wrong.') }}
+                    @if(Route::has(config('site-analytics.routes.name').'system'))
+                        <a href="{{ route(config('site-analytics.routes.name').'system') }}" wire:navigate>{{ __('Open System') }} →</a>
+                    @endif
+                </p>
+            @endif
             <x-site-analytics::ranked-list :items="$countries" :empty="__('No visits in this period.')" />
             <p class="sa-note">{!! __('IP geolocation by :link', ['link' => '<a href="https://db-ip.com" target="_blank" rel="noopener">DB-IP</a>']) !!}</p>
         </x-site-analytics::panel>

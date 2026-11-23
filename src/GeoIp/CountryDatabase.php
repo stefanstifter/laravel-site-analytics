@@ -61,6 +61,18 @@ final class CountryDatabase
         return $builtAt === null || $builtAt->lt(CarbonImmutable::now()->subDays((int) config('site-analytics.geoip.max_age_days', 35)));
     }
 
+    /**
+     * @return 'missing'|'outdated'|'ok'
+     */
+    public function state(): string
+    {
+        return match (true) {
+            ! $this->exists() => 'missing',
+            $this->isOutdated() => 'outdated',
+            default => 'ok',
+        };
+    }
+
     public function size(): ?int
     {
         return $this->exists() ? (int) filesize($this->path()) : null;
