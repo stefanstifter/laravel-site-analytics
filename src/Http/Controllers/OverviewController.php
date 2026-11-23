@@ -9,6 +9,7 @@ use Illuminate\View\View;
 use Stifter\SiteAnalytics\GeoIp\Country;
 use Stifter\SiteAnalytics\GeoIp\CountryDatabase;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
+use Stifter\SiteAnalytics\Models\Click;
 use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Reports\AnalyticsPeriod;
 use Stifter\SiteAnalytics\Reports\DailyChart;
@@ -68,6 +69,7 @@ class OverviewController
                 'peak_day' => $peakDay['label'] ?? null,
                 'page_views' => $totalPageViews,
                 ...$this->eventTotals($period),
+                ...$this->clickTotal($period),
             ],
         ]);
     }
@@ -154,6 +156,20 @@ class OverviewController
                 ? $events(AnalyticsEvent::SEARCH)->count()
                 : null,
         ], fn (?int $total): bool => $total !== null);
+    }
+
+    /**
+     * Clicks on tracked links in the period, once the app has recorded any.
+     *
+     * @return array{clicks?: int}
+     */
+    private function clickTotal(AnalyticsPeriod $period): array
+    {
+        if (! config('site-analytics.clicks.enabled', true) || ! Click::query()->exists()) {
+            return [];
+        }
+
+        return ['clicks' => Click::query()->whereBetween('created_at', [$period->startDate, $period->endDate])->count()];
     }
 
     /**

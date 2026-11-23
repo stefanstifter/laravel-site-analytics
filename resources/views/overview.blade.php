@@ -1,9 +1,12 @@
 <x-site-analytics::layout :title="__('Overview')" :period="$period" :description="__('How many people visit, where they come from and what they look at.')">
-    <x-site-analytics::stats :count="2 + (int) isset($summary['website_clicks']) + (int) isset($summary['searches'])">
+    <x-site-analytics::stats :count="2 + (int) isset($summary['website_clicks']) + (int) isset($summary['searches']) + (int) isset($summary['clicks'])">
         <x-site-analytics::stat :label="__('Visitors')" :value="number_format($summary['total_visitors'])" :hint="__('Sum of daily visitors')" data-summary-visitors="{{ $summary['total_visitors'] }}" />
         <x-site-analytics::stat :label="__('Page Views')" :value="number_format($summary['page_views'])" data-summary-page-views="{{ $summary['page_views'] }}" />
         @isset($summary['website_clicks'])
             <x-site-analytics::stat :label="__('Website Clicks')" :value="number_format($summary['website_clicks'])" :hint="__('Visitors sent to external sites')" data-summary-website-clicks="{{ $summary['website_clicks'] }}" />
+        @endisset
+        @isset($summary['clicks'])
+            <x-site-analytics::stat :label="__('Clicks')" :value="number_format($summary['clicks'])" :hint="__('On tracked links and buttons')" data-summary-clicks="{{ $summary['clicks'] }}" />
         @endisset
         @isset($summary['searches'])
             <x-site-analytics::stat :label="__('Searches')" :value="number_format($summary['searches'])" data-summary-searches="{{ $summary['searches'] }}" />

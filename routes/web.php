@@ -2,6 +2,7 @@
 
 use Illuminate\Routing\RedirectController;
 use Illuminate\Support\Facades\Route;
+use Stifter\SiteAnalytics\Http\Controllers\ClicksController;
 use Stifter\SiteAnalytics\Http\Controllers\OverviewController;
 use Stifter\SiteAnalytics\Http\Controllers\SearchesController;
 use Stifter\SiteAnalytics\Http\Controllers\SystemController;
@@ -9,6 +10,11 @@ use Stifter\SiteAnalytics\SiteAnalyticsServiceProvider;
 
 Route::get('/', OverviewController::class)->name('overview');
 Route::get('searches', SearchesController::class)->name('searches');
+
+if (config('site-analytics.clicks.enabled', true)) {
+    Route::get('clicks', ClicksController::class)->name('clicks');
+}
+
 Route::get('users', RedirectController::class)
     ->defaults('destination', '/'.trim(config('site-analytics.routes.prefix'), '/'))
     ->defaults('status', 302)

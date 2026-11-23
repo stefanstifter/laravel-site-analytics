@@ -488,6 +488,7 @@ a.sa-bar-label:hover {
 .sa-code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8125rem;
+    font-variant-ligatures: none;
 }
 
 .sa-actions {
@@ -516,6 +517,69 @@ a.sa-bar-label:hover {
 
 .sa-button:hover {
     filter: brightness(1.1);
+}
+
+/* Clicks: drill-down trail, links in tables, setup instructions */
+
+.sa-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    color: var(--sa-muted);
+}
+
+.sa-crumbs a {
+    text-decoration: none;
+}
+
+.sa-crumbs a:hover {
+    text-decoration: underline;
+}
+
+.sa-crumbs [aria-current] {
+    color: var(--sa-text);
+    font-weight: 600;
+}
+
+.sa-link {
+    color: var(--sa-text-soft);
+    text-decoration: none;
+}
+
+.sa-link:hover {
+    text-decoration: underline;
+}
+
+.sa-sub {
+    margin-top: 0.125rem;
+    overflow: hidden;
+    color: var(--sa-muted);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 40rem;
+}
+
+.sa-prose {
+    display: grid;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--sa-text-soft);
+}
+
+.sa-pre {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    border: 1px solid var(--sa-border);
+    border-radius: var(--sa-radius);
+    background: var(--sa-surface-soft);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    font-variant-ligatures: none;
+    line-height: 1.6;
 }
 
 /* Collapsible section */

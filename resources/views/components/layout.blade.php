@@ -9,6 +9,7 @@
     $navigation = collect([
         ['label' => 'Overview', 'route' => $routePrefix.'overview'],
         ['label' => 'Searches', 'route' => $routePrefix.'searches'],
+        ['label' => 'Clicks', 'route' => $routePrefix.'clicks'],
         ...config('site-analytics.extra_navigation', []),
     ])->filter(fn (array $item): bool => Route::has($item['route']));
 @endphp

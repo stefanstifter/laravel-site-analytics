@@ -73,7 +73,7 @@ class ReportPagesTest extends TestCase
         $response = $this->get('/dashboard/analytics?period=7')->assertOk();
 
         preg_match_all('/data-tab="([^"]+)"/', $response->getContent(), $tabs);
-        $this->assertSame(['admin.analytics.overview', 'admin.analytics.searches', 'admin.analytics.races', 'admin.analytics.system'], $tabs[1]);
+        $this->assertSame(['admin.analytics.overview', 'admin.analytics.searches', 'admin.analytics.clicks', 'admin.analytics.races', 'admin.analytics.system'], $tabs[1]);
         $response->assertSee('href="http://localhost/dashboard/analytics/races?period=7"', false);
     }
 
