@@ -3,6 +3,26 @@
 return [
 
     /**
+     * Record page views and events at all. Set ANALYTICS_ENABLED=false to switch tracking off, e.g. in tests.
+     */
+    'enabled' => env('ANALYTICS_ENABLED', true),
+
+    /**
+     * Paths not recorded as page views, as accepted by $request->is(), e.g. 'dashboard' and 'dashboard/*'. Full URLs work too.
+     */
+    'exclude' => [],
+
+    /**
+     * IP addresses whose page views are not recorded.
+     */
+    'ignored_ips' => [],
+
+    /**
+     * Do not record page views from crawlers and other bots. Events are never recorded for bots.
+     */
+    'ignore_robots' => true,
+
+    /**
      * Admin report pages: URL prefix, route name prefix, middleware and the Blade layout component they render in.
      */
     'routes' => [

@@ -2,12 +2,13 @@
 
 namespace Stifter\SiteAnalytics;
 
-use AndreasElia\Analytics\Agent;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Stifter\SiteAnalytics\Detection\UserAgent;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
+use Stifter\SiteAnalytics\Session\SessionHash;
 use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
 
 /**
@@ -22,7 +23,7 @@ class EventRecorder
      */
     public function record(Request $request, string $name, ?Model $subject = null, array $properties = []): ?AnalyticsEvent
     {
-        $agent = $this->agent($request);
+        $agent = UserAgent::fromRequest($request);
 
         if (! $this->shouldTrack($request, $agent)) {
             return null;
@@ -31,8 +32,8 @@ class EventRecorder
         $event = new AnalyticsEvent([
             'name' => $name,
             'visitor' => $this->visitorIdentifier->identify($request),
-            'session' => $request->hasSession() ? app(config('analytics.session.provider'))->get($request) : null,
-            'device' => $agent->deviceType(),
+            'session' => SessionHash::fromRequest($request),
+            'device' => $agent->device(),
             'properties' => $properties === [] ? null : $properties,
         ]);
 
@@ -131,9 +132,9 @@ class EventRecorder
         }
     }
 
-    public function shouldTrack(Request $request, ?Agent $agent = null): bool
+    public function shouldTrack(Request $request, ?UserAgent $agent = null): bool
     {
-        if (! config('analytics.enabled')) {
+        if (! config('site-analytics.enabled')) {
             return false;
         }
 
@@ -141,15 +142,6 @@ class EventRecorder
             return false;
         }
 
-        return ! ($agent ?? $this->agent($request))->isRobot();
-    }
-
-    private function agent(Request $request): Agent
-    {
-        $agent = new Agent;
-        $agent->setUserAgent($request->userAgent() ?? '');
-        $agent->setHttpHeaders($request->headers);
-
-        return $agent;
+        return ! ($agent ?? UserAgent::fromRequest($request))->isRobot();
     }
 }
