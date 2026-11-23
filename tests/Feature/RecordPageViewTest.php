@@ -26,6 +26,10 @@ class RecordPageViewTest extends TestCase
             Route::get('about', fn (): string => 'about');
             Route::post('about', fn (): string => 'posted');
             Route::get('admin/races', fn (): string => 'admin');
+            Route::get('old', fn () => redirect('/'));
+            Route::get('missing', fn () => abort(404));
+            Route::get('feed.json', fn (): array => ['items' => []]);
+            Route::get('sitemap.xml', fn () => response('<urlset/>', 200, ['Content-Type' => 'application/xml']));
         });
 
         Route::middleware(['web', 'analytics'])->get('legacy', fn (): string => 'legacy');
@@ -118,6 +122,23 @@ class RecordPageViewTest extends TestCase
         config()->set('site-analytics.enabled', false);
 
         $this->get('/about')->assertOk();
+
+        $this->assertSame(0, PageView::query()->count());
+    }
+
+    public function test_it_skips_redirects_errors_and_responses_other_than_html(): void
+    {
+        $this->get('/old')->assertRedirect('/');
+        $this->get('/missing')->assertNotFound();
+        $this->get('/feed.json')->assertOk();
+        $this->get('/sitemap.xml')->assertOk();
+
+        $this->assertSame(0, PageView::query()->count());
+    }
+
+    public function test_it_skips_browser_prefetches(): void
+    {
+        $this->withHeader('Sec-Purpose', 'prefetch;prerender')->get('/about')->assertOk();
 
         $this->assertSame(0, PageView::query()->count());
     }

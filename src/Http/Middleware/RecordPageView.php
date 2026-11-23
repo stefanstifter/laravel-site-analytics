@@ -14,7 +14,7 @@ use Stifter\SiteAnalytics\Visitor\VisitorIdentifier;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Records a page view for GET requests once the response has been built.
+ * Records a page view for GET requests answered with a successful HTML page, once the response has been built.
  */
 final class RecordPageView
 {
@@ -29,11 +29,23 @@ final class RecordPageView
         $response = $next($request);
         $agent = UserAgent::fromRequest($request);
 
-        if ($this->shouldRecord($request, $agent)) {
+        if ($this->isPage($request, $response) && $this->shouldRecord($request, $agent)) {
             $this->record($request, $agent);
         }
 
         return $response;
+    }
+
+    /**
+     * Redirects, errors, downloads, feeds, JSON and browser prefetches are not page views.
+     */
+    private function isPage(Request $request, Response $response): bool
+    {
+        $contentType = (string) $response->headers->get('Content-Type');
+
+        return $response->isSuccessful()
+            && ($contentType === '' || str_contains(strtolower($contentType), 'text/html'))
+            && ! str_contains(strtolower($request->headers->get('Sec-Purpose', $request->headers->get('Purpose', ''))), 'prefetch');
     }
 
     private function shouldRecord(Request $request, UserAgent $agent): bool
