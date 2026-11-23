@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Stifter\SiteAnalytics\Reports;
 
-use AndreasElia\Analytics\Models\PageView;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Stifter\SiteAnalytics\Models\PageView;
 
 /**
  * The selectable reporting window for the admin analytics pages, ending today.

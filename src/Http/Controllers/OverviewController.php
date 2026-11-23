@@ -2,13 +2,13 @@
 
 namespace Stifter\SiteAnalytics\Http\Controllers;
 
-use AndreasElia\Analytics\Models\PageView;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Stifter\SiteAnalytics\Models\AnalyticsEvent;
+use Stifter\SiteAnalytics\Models\PageView;
 use Stifter\SiteAnalytics\Reports\AnalyticsPeriod;
 
 class OverviewController
