@@ -73,6 +73,20 @@ class ReportPagesTest extends TestCase
             ->assertSee('data-filter-value="Europe"', false);
     }
 
+    public function test_the_reports_are_translated_into_german(): void
+    {
+        $this->app->setLocale('de');
+        PageView::factory()->create(['created_at' => '2026-03-14 12:00:00']);
+        $this->travelTo('2026-03-20');
+
+        $this->get('/dashboard/analytics?period=7')
+            ->assertOk()
+            ->assertSee('Übersicht')
+            ->assertSee('Letzte 30 Tage')
+            ->assertSee('Seitenaufrufe')
+            ->assertSee('14. Mär 2026');
+    }
+
     public function test_the_reports_render_inside_the_configured_app_layout(): void
     {
         config(['site-analytics.layout' => 'layouts.app', 'site-analytics.dark_mode' => 'class']);

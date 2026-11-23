@@ -40,6 +40,7 @@ class SiteAnalyticsServiceProvider extends ServiceProvider
 
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'site-analytics');
+        $this->loadJsonTranslationsFrom(__DIR__.'/../lang');
         Blade::anonymousComponentPath(__DIR__.'/../resources/views/components', 'site-analytics');
 
         $this->registerRoutes();

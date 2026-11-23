@@ -166,7 +166,7 @@ class OverviewController
         return $visitorsByType
             ->map(fn (int $visitors, string $type): array => [
                 'type' => $type,
-                'label' => self::DEVICE_LABELS[$type] ?? 'Other',
+                'label' => __(self::DEVICE_LABELS[$type] ?? 'Other'),
                 'visitors' => $visitors,
                 'share' => $totalVisitors > 0 ? (int) round($visitors / $totalVisitors * 100) : 0,
             ])
@@ -188,7 +188,7 @@ class OverviewController
 
             return [
                 'date' => $dateKey,
-                'label' => $date->format('M j, Y'),
+                'label' => $date->locale(app()->getLocale())->translatedFormat(__('M j, Y')),
                 'visitors' => $visitors,
                 'page_views' => (int) ($row?->page_views ?? 0),
                 'mobile_share' => $visitors > 0 ? (int) round((int) $row->mobile_visitors / $visitors * 100) : null,
@@ -247,7 +247,7 @@ class OverviewController
         $labelIndexes = array_unique([0, intdiv($count - 1, 2), $count - 1]);
         $xLabels = collect($labelIndexes)->map(fn (int $index, int $position): array => [
             'x' => $points[$index]['x'],
-            'label' => CarbonImmutable::parse($points[$index]['date'])->format('M j'),
+            'label' => CarbonImmutable::parse($points[$index]['date'])->locale(app()->getLocale())->translatedFormat(__('M j')),
             'anchor' => match (true) {
                 $index === 0 => 'start',
                 $index === $count - 1 => 'end',
